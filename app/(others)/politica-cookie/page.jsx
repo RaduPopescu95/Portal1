@@ -1,22 +1,21 @@
 import AboutUs from "@/components/about-us";
 import { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
+import StaticPageContent from "@/components/sanity/StaticPageContent";
+import { getStaticPageBySlug } from "@/lib/sanity/queries";
+import { getStaticPageMetadata } from "@/lib/sanity/staticPage";
 
-export const metadata = {
+const fallbackMetadata = {
   title: "Politica de cookie",
   description:
     "Politica de utilizare a fisierelor cookie pe FirmeAmenajariGradina.ro.",
-  openGraph: {
-    title: "Politica de cookie",
-    description:
-      "Politica de utilizare a fisierelor cookie pe FirmeAmenajariGradina.ro.",
-    url: "/politica-cookie",
-  },
-  alternates: {
-    canonical: "/politica-cookie",
-  },
 };
 
-const index = () => {
+export async function generateMetadata() {
+  return getStaticPageMetadata("politica-cookie", fallbackMetadata);
+}
+
+const index = async () => {
+  const page = await getStaticPageBySlug("politica-cookie");
   return (
     <>
       <BreadcrumbsJsonLd
@@ -25,7 +24,7 @@ const index = () => {
           { name: "Politica de cookie", path: "/politica-cookie" },
         ]}
       />
-      <AboutUs />
+      {page ? <StaticPageContent page={page} /> : <AboutUs />}
     </>
   );
 };

@@ -5,12 +5,17 @@ import "photoswipe/dist/photoswipe.css";
 import propertiesContent from "../../data/properties";
 import Image from "next/image";
 
+const FALLBACK_IMAGE = "/assets/categorii/amenajari-gradini-si-spatii-verzi.svg";
+
 const ListingGallery = ({ firma }) => {
   console.log("test........", firma);
+  const images = firma?.imagini?.imgs?.length
+    ? firma.imagini.imgs
+    : [{ finalUri: FALLBACK_IMAGE, alt: `${firma?.siteName || "Firma"} imagine` }];
   const fallbackAlt = [firma?.siteName, firma?.categorie, firma?.localitate]
     .filter(Boolean)
     .join(" - ");
-  const firstImg = firma?.imagini?.imgs?.[0];
+  const firstImg = images[0];
   const firstAlt =
     (firstImg && firstImg.alt) ||
     fallbackAlt ||
@@ -25,8 +30,8 @@ const ListingGallery = ({ firma }) => {
                 <div className="col-lg-12">
                   <div className="spls_style_two mb30-520">
                     <Item
-                      original={firma?.imagini?.imgs[0].finalUri}
-                      thumbnail={firma?.imagini?.imgs[0].finalUri}
+                      original={images[0].finalUri}
+                      thumbnail={images[0].finalUri}
                       width={752}
                       height={450}
                     >
@@ -36,7 +41,7 @@ const ListingGallery = ({ firma }) => {
                             width={752}
                             height={450}
                             className="img-fluid w100 lds-1 cover h-100"
-                            src={firma?.imagini?.imgs[0].finalUri}
+                            src={images[0].finalUri}
                             alt={firstAlt}
                           />
                         </div>
@@ -50,7 +55,7 @@ const ListingGallery = ({ firma }) => {
 
             <div className="col-sm-5 col-lg-4">
               <div className="row">
-                {firma?.imagini?.imgs.map((val, i) => {
+                {images.map((val, i) => {
                   // Skip the first item (index 0)
                   if (i === 0) return null;
 

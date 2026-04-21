@@ -1,22 +1,21 @@
 import AboutUs from "@/components/about-us";
 import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
+import StaticPageContent from "@/components/sanity/StaticPageContent";
+import { getStaticPageBySlug } from "@/lib/sanity/queries";
+import { getStaticPageMetadata } from "@/lib/sanity/staticPage";
 
-export const metadata = {
+const fallbackMetadata = {
   title: "Cum functioneaza portalul",
   description:
     "Afla cum gasesti rapid o firma de amenajari gradini pe FirmeAmenajariGradina.ro si cum soliciti o oferta personalizata.",
-  openGraph: {
-    title: "Cum functioneaza portalul",
-    description:
-      "Afla cum gasesti rapid o firma de amenajari gradini pe FirmeAmenajariGradina.ro si cum soliciti o oferta personalizata.",
-    url: "/cum-functioneaza",
-  },
-  alternates: {
-    canonical: "/cum-functioneaza",
-  },
 };
 
-const index = () => {
+export async function generateMetadata() {
+  return getStaticPageMetadata("cum-functioneaza", fallbackMetadata);
+}
+
+const index = async () => {
+  const page = await getStaticPageBySlug("cum-functioneaza");
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -35,7 +34,7 @@ const index = () => {
         ]}
       />
 
-      <AboutUs />
+      {page ? <StaticPageContent page={page} /> : <AboutUs />}
     </>
   );
 };

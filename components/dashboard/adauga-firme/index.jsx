@@ -24,7 +24,6 @@ import selectedFiles from "@/utils/selectedFiles";
 import { useParams, useRouter } from "next/navigation";
 import CommonLoader from "@/components/common/CommonLoader";
 import { uploadImage, uploadMultipleImages } from "@/utils/storageUtils";
-import DOMPurify from "isomorphic-dompurify";
 import { validateMetaFields } from "@/utils/seoValidation";
 import { slugify, slugifyFirma } from "@/utils/slugify";
 

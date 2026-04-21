@@ -1,15 +1,22 @@
 import Service from "@/components/service";
+import StaticPageContent from "@/components/sanity/StaticPageContent";
+import { getStaticPageBySlug } from "@/lib/sanity/queries";
+import { getStaticPageMetadata } from "@/lib/sanity/staticPage";
 
-export const metadata = {
-  title: 'titlu',
-  description:
-    'titlu',
+const fallbackMetadata = {
+  title: "Servicii",
+  description: "Servicii de amenajari gradini si spatii verzi.",
+};
+
+export async function generateMetadata() {
+  return getStaticPageMetadata("service", fallbackMetadata);
 }
 
-const index = () => {
+const index = async () => {
+  const page = await getStaticPageBySlug("service");
   return (
     <>
-      <Service />
+      {page ? <StaticPageContent page={page} /> : <Service />}
     </>
   );
 };

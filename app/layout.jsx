@@ -6,6 +6,7 @@ import { store } from "../store/store";
 import "../public/assets/scss/index.scss";
 import { Nunito } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { getSiteSettings } from "@/lib/sanity/queries";
 // import CookieBanner from "@/components/Cookies/CookieBanner";
 // import { AuthProvider } from "@/context/AuthContext";
 // import { LoadScript } from "@react-google-maps/api";
@@ -13,7 +14,7 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
 
-export const metadata = {
+const defaultMetadata = {
   title: {
     default:
       "Firme Amenajari Gradini si Spatii Verzi | Peisagisti Romania",
@@ -71,6 +72,52 @@ export const metadata = {
   },
   // robots: NU se seteaza aici; app/robots.js gestioneaza global.
 };
+
+export async function generateMetadata() {
+  const settings = await getSiteSettings();
+  const defaultSeo = settings?.defaultSeo;
+  const title =
+    defaultSeo?.metaTitle || defaultMetadata.title.default;
+  const description =
+    defaultSeo?.metaDescription || defaultMetadata.description;
+  const socialImage = defaultSeo?.socialImage?.finalUri
+    ? [
+        {
+          url: defaultSeo.socialImage.finalUri,
+          width: defaultSeo.socialImage.width || 1200,
+          height: defaultSeo.socialImage.height || 630,
+          alt: defaultSeo.socialImage.alt || settings?.title || title,
+        },
+      ]
+    : defaultMetadata.openGraph.images;
+
+  return {
+    ...defaultMetadata,
+    title: {
+      ...defaultMetadata.title,
+      default: title,
+    },
+    description,
+    openGraph: {
+      ...defaultMetadata.openGraph,
+      title,
+      description,
+      images: socialImage,
+    },
+    twitter: {
+      ...defaultMetadata.twitter,
+      title,
+      description,
+      images: socialImage.map((image) => image.url),
+    },
+    verification: {
+      google:
+        settings?.googleSiteVerification ||
+        process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ||
+        undefined,
+    },
+  };
+}
 
 const nunito = Nunito({
   weight: ["400", "600", "700"],

@@ -1,6 +1,8 @@
 import Image from "next/image";
 import FormularContact from "./FormularContact";
 
+const FALLBACK_LOGO = "/assets/categorii/amenajari-gradini-si-spatii-verzi.svg";
+
 const PropertyHeader = ({ firma }) => {
   return (
     <div className="feat_property list agency">
@@ -10,8 +12,8 @@ const PropertyHeader = ({ firma }) => {
             width={100}
             height={100}
             className="logo1 img-fluid"
-            src={firma?.logo?.finalUri}
-            alt={`${firma?.siteName || "Firma"} logo`}
+            src={firma?.logo?.finalUri || FALLBACK_LOGO}
+            alt={firma?.logo?.alt || `${firma?.siteName || "Firma"} logo`}
             priority
           />
           <div className="d-flex flex-column justify-content-center align-items-center">

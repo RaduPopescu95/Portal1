@@ -8,7 +8,7 @@ import PopupSignInUp from "../common/PopupSignInUp";
 import BreadCrumbBlog from "./BreadCrumbBlog";
 import Blog from "./Blog";
 
-const index = () => {
+const index = ({ articole = [] }) => {
   return (
     <>
       {/* <!-- Main Header Nav --> */}
@@ -33,7 +33,7 @@ const index = () => {
           <div className="row">
             <div className="col-lg-8 col-xl-8 order-2 order-md-1">
               <div className="main_blog_post_content">
-                <Blog />
+                <Blog articole={articole} />
                 {/* End blog item */}
 
                 <div className="mbp_pagination mt20">

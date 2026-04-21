@@ -1,8 +1,5 @@
 import Wrapper from "@/components/layout/Wrapper";
 import HomeMain from "./(homes)/home-page/page";
-import { handleGetFirestore } from "@/utils/firestoreUtils";
-import { fetchFirme } from "@/utils/localProjectlUtils";
-import { cache } from "react";
 import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
 
 const SITE_URL =

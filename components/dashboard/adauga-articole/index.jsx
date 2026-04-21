@@ -18,7 +18,6 @@ import {
 import { useParams, useRouter } from "next/navigation";
 import { uploadImage } from "@/utils/storageUtils";
 import CommonLoader from "@/components/common/CommonLoader";
-import DOMPurify from "isomorphic-dompurify";
 import { validateMetaFields } from "@/utils/seoValidation";
 
 const Index = () => {

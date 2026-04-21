@@ -1,22 +1,21 @@
 import AboutUs from "@/components/about-us";
 import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
+import StaticPageContent from "@/components/sanity/StaticPageContent";
+import { getStaticPageBySlug } from "@/lib/sanity/queries";
+import { getStaticPageMetadata } from "@/lib/sanity/staticPage";
 
-export const metadata = {
+const fallbackMetadata = {
   title: "Despre noi",
   description:
     "Afla mai multe despre FirmeAmenajariGradina.ro – directorul national de firme de amenajari gradini si spatii verzi.",
-  openGraph: {
-    title: "Despre noi",
-    description:
-      "Afla mai multe despre FirmeAmenajariGradina.ro – directorul national de firme de amenajari gradini si spatii verzi.",
-    url: "/despre-noi",
-  },
-  alternates: {
-    canonical: "/despre-noi",
-  },
 };
 
-const index = () => {
+export async function generateMetadata() {
+  return getStaticPageMetadata("despre-noi", fallbackMetadata);
+}
+
+const index = async () => {
+  const page = await getStaticPageBySlug("despre-noi");
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "AboutPage",
@@ -35,7 +34,7 @@ const index = () => {
         ]}
       />
 
-      <AboutUs />
+      {page ? <StaticPageContent page={page} /> : <AboutUs />}
     </>
   );
 };

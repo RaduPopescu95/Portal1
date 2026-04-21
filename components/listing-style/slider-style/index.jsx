@@ -19,22 +19,19 @@ import Image from "next/image";
 import Button from "@/components/common/CommonButton";
 import CallToAction from "@/components/common/CallToAction";
 import BreadCrumb from "@/components/common/BreadCrumb";
-import {
-  handleGetFirestore,
-  handleQueryDoubleParam,
-  handleQueryFirestore,
-} from "@/utils/firestoreUtils";
-import { fetchFirme } from "@/utils/localProjectlUtils";
+import PortableContent from "@/components/sanity/PortableContent";
 
 import { notFound } from "next/navigation";
 
 const index = async ({
   params,
   categorii,
+  localitati,
   firme,
   judete,
   searchParams,
   h1Title,
+  landingPage,
   renderMode, // "home" | "listing" | "detail" (defaults by params presence)
 }) => {
   const pageH1 =
@@ -87,12 +84,52 @@ const index = async ({
                     className="mt40"
                     judete={judete}
                     categorii={categorii}
+                    localitati={localitati}
                   />
                 </div>
               </div>
             </div>
           </div>
           {/* End container */}
+        </section>
+      )}
+
+      {landingPage && (
+        <section className="blog_post_container bgc-f7 pb30">
+          <div className="container">
+            <div className="row">
+              <div className="col-lg-10 offset-lg-1">
+                {landingPage.intro && (
+                  <p className="fz18 txt-color-third">{landingPage.intro}</p>
+                )}
+                <PortableContent value={landingPage.content} />
+                {Array.isArray(landingPage.faq) && landingPage.faq.length > 0 && (
+                  <div className="mt30">
+                    <h2>Intrebari frecvente</h2>
+                    {landingPage.faq.map((item) => (
+                      <div key={item._key || item.question} className="mb15">
+                        <h3 className="fz20">{item.question}</h3>
+                        <p>{item.answer}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {Array.isArray(landingPage.internalLinks) &&
+                  landingPage.internalLinks.length > 0 && (
+                    <div className="mt30">
+                      <h2>Pagini utile</h2>
+                      <ul>
+                        {landingPage.internalLinks.map((link) => (
+                          <li key={link._key || link.path}>
+                            <a href={link.path}>{link.label}</a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+              </div>
+            </div>
+          </div>
         </section>
       )}
 

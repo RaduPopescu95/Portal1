@@ -9,10 +9,14 @@ import CheckBoxFilter from "./CheckBoxFilter";
 import GlobalSelectBox from "./GlobalSelectBox";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { handleQueryFirestoreSubcollection } from "@/utils/firestoreUtils";
 import { replaceSpacesWithDashes } from "@/utils/strintText";
 
-const ListSearchInputs = ({ className = "", judete, categorii }) => {
+const ListSearchInputs = ({
+  className = "",
+  judete = [],
+  categorii = [],
+  localitati: allLocalitati = [],
+}) => {
   const router = useRouter();
   const [selectedJudet, setSelectedJudet] = useState("");
   const [selectedLocalitate, setSelectedLocalitate] = useState("");
@@ -38,19 +42,12 @@ const ListSearchInputs = ({ className = "", judete, categorii }) => {
     );
 
     if (judetSelected) {
-      try {
-        // Utilizăm siteName pentru a interoga Firestore
-        const localitatiFromFirestore = await handleQueryFirestoreSubcollection(
-          "Localitati",
-          "judet",
-          judetSelected.siteName
-        );
-        // Presupunem că localitatiFromFirestore este array-ul corect al localităților
-        setLocalitati(localitatiFromFirestore);
-      } catch (error) {
-        console.error("Failed to fetch locations:", error);
-        setLocalitati([]); // Resetează localitățile în caz de eroare
-      }
+      const filteredLocalitati = allLocalitati.filter(
+        (location) =>
+          location.judet === judetSelected.siteName ||
+          location.countySlug === judetSelected.slug
+      );
+      setLocalitati(filteredLocalitati);
     } else {
       // Dacă nu găsim județul selectat, resetăm localitățile
       setLocalitati([]);

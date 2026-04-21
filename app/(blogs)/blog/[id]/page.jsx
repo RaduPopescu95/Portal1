@@ -11,29 +11,30 @@ import Social from "@/components/common/footer/Social";
 import Header from "@/components/common/header/DefaultHeader";
 import MobileMenu from "@/components/common/header/MobileMenu";
 import PopupSignInUp from "@/components/common/PopupSignInUp";
-import blogs from "@/data/blogs";
 import Image from "next/image";
-
-import {
-  handleGetFirestore,
-  handleQueryFirestore,
-} from "@/utils/firestoreUtils";
 import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
 import { buildArticleLd } from "@/utils/schemaOrg";
+import {
+  getArticleBySlug,
+  getArticleSlugs,
+  getArticles,
+} from "@/lib/sanity/queries";
+import PortableContent from "@/components/sanity/PortableContent";
+import { notFound } from "next/navigation";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
 
 export const revalidate = 60; // revalidate at most every minute , hour at 3600
 
+const FALLBACK_IMAGE = "/assets/categorii/amenajari-gradini-si-spatii-verzi.svg";
+
+export async function generateStaticParams() {
+  return await getArticleSlugs();
+}
+
 export async function generateMetadata({ params }) {
-  if (params.id === "favicon.ico") {
-    return null;
-  }
-  const parts = params.id.split("-");
-  const id = Number(parts[0]);
-  const blogArr = await handleQueryFirestore("Articole", "id", id);
-  const blog = blogArr?.[0];
+  const blog = await getArticleBySlug(params.id);
 
   const title = blog?.metaTitle || blog?.siteName || "Articol blog";
   const description =
@@ -58,15 +59,13 @@ export async function generateMetadata({ params }) {
 }
 
 const BlogDetailsDynamic = async ({ params }) => {
-  const parts = params.id.split("-");
-  const id = Number(parts[0]);
-  if (id === "favicon.ico") {
-    return null; // Returnează null sau orice alt component care indică că pagina nu trebuie să proceseze acest id.
+  const [blog, articole] = await Promise.all([
+    getArticleBySlug(params.id),
+    getArticles({ limit: 6 }),
+  ]);
+  if (!blog) {
+    notFound();
   }
-  console.log("id is here...", id);
-  const blogArr = await handleQueryFirestore("Articole", "id", id);
-  const articole = await handleGetFirestore("Articole");
-  const blog = blogArr[0];
   const articleLd = buildArticleLd(blog, SITE_URL, `/blog/${params.id}`);
 
   return (
@@ -149,31 +148,14 @@ const BlogDetailsDynamic = async ({ params }) => {
                       width={692}
                       height={414}
                       className="w-100 h-100 cover"
-                      src={blog?.image?.finalUri}
-                      alt={blog?.siteName || "Articol blog"}
+                      src={blog?.image?.finalUri || FALLBACK_IMAGE}
+                      alt={blog?.image?.alt || blog?.siteName || "Articol blog"}
                       priority
                     />
                   </div>
 
                   <div className="details">
-                    {blog?.articleContentFirst && (
-                      <div
-                        className="mb25"
-                        dangerouslySetInnerHTML={{
-                          __html: blog.articleContentFirst,
-                        }}
-                      ></div>
-                    )}
-                  </div>
-                  <div className="details">
-                    {blog?.articleContentSecond && (
-                      <div
-                        className="mb25"
-                        dangerouslySetInnerHTML={{
-                          __html: blog.articleContentSecond,
-                        }}
-                      ></div>
-                    )}
+                    <PortableContent value={blog?.content} className="mb25" />
                   </div>
                   <ul className="blog_post_share">
                     <li>

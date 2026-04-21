@@ -1,20 +1,13 @@
 import Link from "next/link";
 
-import { addLength } from "../../../features/properties/propertiesSlice";
-import properties from "../../../data/properties";
 import Image from "next/image";
-import { fetchLocation } from "@/app/services/geocoding";
-import { handleDiacrtice, replaceSpacesWithDashes } from "@/utils/strintText";
 import AgencyDetails from "@/components/agency-details";
-import {
-  handleQueryDoubleParam,
-  handleQueryFirestore,
-} from "@/utils/firestoreUtils";
-import { calculateDistance } from "@/utils/commonUtils";
 import PromotionSection from "./PromotionSection";
 import { slugifyFirma } from "@/utils/slugify";
 
-const FeaturedItem = ({ firme, params, searchParams, renderMode }) => {
+const FALLBACK_IMAGE = "/assets/categorii/amenajari-gradini-si-spatii-verzi.svg";
+
+const FeaturedItem = ({ firme = [], params, searchParams, renderMode }) => {
   let content;
   const mode = renderMode || (params ? "detail" : "home");
 
@@ -23,10 +16,12 @@ const FeaturedItem = ({ firme, params, searchParams, renderMode }) => {
   }
 
   if (mode === "detail") {
-    content = firme.slice(0, 1).map((item) => <AgencyDetails firma={item} />);
+    content = firme
+      .slice(0, 1)
+      .map((item) => <AgencyDetails key={item._id || item.slug} firma={item} />);
   } else {
     content = firme.map((item, idx) => (
-      <div className={`${"col-md-3 col-lg-3"} `} key={item.id || item.documentId}>
+      <div className={`${"col-md-3 col-lg-3"} `} key={item._id || item.id || item.documentId || item.slug}>
         <Link
           href={`/firma/${item?.slug || slugifyFirma(item)}`}
         >
@@ -36,7 +31,7 @@ const FeaturedItem = ({ firme, params, searchParams, renderMode }) => {
                 width={342}
                 height={220}
                 className="img-whp w-100 h-100 cover"
-                src={item?.imagini?.imgs[0]?.finalUri}
+                src={item?.imagini?.imgs?.[0]?.finalUri || FALLBACK_IMAGE}
                 alt={
                   item?.imagini?.imgs?.[0]?.alt ||
                   [item?.siteName, item?.categorie, item?.localitate]

@@ -15,8 +15,6 @@ import Image from "next/image";
 import Map from "../map/Map";
 import Button from "../common/CommonButton";
 import SectiuneIncredere from "../common/SectiuneIncredere";
-// import { unstable_noStore as noStore } from "next/cache";
-import { handleGetFirestore } from "@/utils/firestoreUtils";
 // import CookieBanner from "../Cookies/CookieBanner";
 import FeaturedItem from "../listing-style/slider-style/FeaturedItem";
 

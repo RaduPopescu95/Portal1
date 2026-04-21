@@ -1,18 +1,13 @@
 import Link from "next/link";
 
 import Image from "next/image";
-import { fetchLocation } from "@/app/services/geocoding";
-import { handleDiacrtice, replaceSpacesWithDashes } from "@/utils/strintText";
 import AgencyDetails from "@/components/agency-details";
-import {
-  handleQueryDoubleParam,
-  handleQueryFirestore,
-} from "@/utils/firestoreUtils";
-import { calculateDistance } from "@/utils/commonUtils";
 import PromotionSection from "../listing-style/slider-style/PromotionSection";
 import { slugifyFirma } from "@/utils/slugify";
 
-const FirmaItem = ({ firme, params }) => {
+const FALLBACK_IMAGE = "/assets/categorii/amenajari-gradini-si-spatii-verzi.svg";
+
+const FirmaItem = ({ firme = [], params }) => {
   let content;
   // if (params && firme.length === 0) {
   //   return <PromotionSection params={params} />;
@@ -22,14 +17,14 @@ const FirmaItem = ({ firme, params }) => {
   //   content = firme.map((item) => <AgencyDetails firma={item} />);
   // } else {
   content = firme.map((item) => (
-    <div className={`${"col-md-3 col-lg-3"} `} key={item.id}>
+    <div className={`${"col-md-3 col-lg-3"} `} key={item._id || item.id || item.slug}>
       <div className={`feat_property home7 style4 ${undefined}`}>
         <div className="thumb">
           <Image
             width={342}
             height={220}
             className="img-whp w-100 h-100 cover"
-            src={item?.imagini?.imgs[0]?.finalUri}
+            src={item?.imagini?.imgs?.[0]?.finalUri || FALLBACK_IMAGE}
             alt={
               item?.imagini?.imgs?.[0]?.alt ||
               [item?.siteName, item?.categorie, item?.localitate]

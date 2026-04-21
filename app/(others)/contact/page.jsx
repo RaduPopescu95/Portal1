@@ -1,22 +1,21 @@
 import Contact from "@/components/contact";
 import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
+import StaticPageContent from "@/components/sanity/StaticPageContent";
+import { getStaticPageBySlug } from "@/lib/sanity/queries";
+import { getStaticPageMetadata } from "@/lib/sanity/staticPage";
 
-export const metadata = {
+const fallbackMetadata = {
   title: "Contact",
   description:
     "Contacteaza echipa FirmeAmenajariGradina.ro pentru intrebari, colaborari sau inscrierea unei firme de amenajari gradini in director.",
-  openGraph: {
-    title: "Contact",
-    description:
-      "Contacteaza echipa FirmeAmenajariGradina.ro pentru intrebari, colaborari sau inscrierea unei firme de amenajari gradini in director.",
-    url: "/contact",
-  },
-  alternates: {
-    canonical: "/contact",
-  },
 };
 
-const index = () => {
+export async function generateMetadata() {
+  return getStaticPageMetadata("contact", fallbackMetadata);
+}
+
+const index = async () => {
+  const page = await getStaticPageBySlug("contact");
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ContactPage",
@@ -35,6 +34,7 @@ const index = () => {
         ]}
       />
 
+      {page && <StaticPageContent page={page} />}
       <Contact />
     </>
   );

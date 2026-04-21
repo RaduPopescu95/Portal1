@@ -16,17 +16,10 @@ import HeroSlider from "./HeroSlider";
 import Image from "next/image";
 import CallToAction from "../common/CallToAction";
 import SidebarListing from "../common/listing/SidebarListing";
-import {
-  handleGetFirestore,
-  handleQueryFirestore,
-  handleQueryFirestoreSubcollection,
-} from "@/utils/firestoreUtils";
 import BreadCrumbBanner from "./BreadCrumbBanner";
 import FirmaItem from "./FirmaItem";
 
-import { fetchFirme, transferaImagini } from "@/utils/localProjectlUtils";
 import { capitalizeFirstLetter } from "@/utils/strintText";
-import { filtrareOferte } from "@/utils/commonUtils";
 
 const index = async ({ data, judet, params, searchParams, h1Title }) => {
   const pageH1 =

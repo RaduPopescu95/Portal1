@@ -16,7 +16,6 @@ import {
   handleUploadFirestore,
 } from "@/utils/firestoreUtils";
 import { useParams, useRouter } from "next/navigation";
-import DOMPurify from "isomorphic-dompurify";
 
 const Index = () => {
   const [formValues, setFormValues] = useState({

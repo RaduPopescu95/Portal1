@@ -1,15 +1,12 @@
 import SliderStyle from "@/components/listing-style/slider-style";
-import { unstable_noStore as noStore } from "next/cache";
-import {
-  handleGetFirestore,
-  handleQueryDoubleParam,
-  handleQueryFirestore,
-} from "@/utils/firestoreUtils";
-import { fetchFirme } from "@/utils/localProjectlUtils";
-
-import { cache } from "react";
 import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
 import { buildItemListLd } from "@/utils/schemaOrg";
+import {
+  getCounties,
+  getCities,
+  getPublishedCompanies,
+  getServiceCategories,
+} from "@/lib/sanity/queries";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
@@ -31,35 +28,18 @@ export const metadata = {
 
 export const revalidate = 60; // revalidate at most every minute , hour at 3600
 
-const getFirme = cache(async (params, categorii) => {
-  let firme = fetchFirme(params, categorii);
-  return firme;
-});
-
 export async function getServerData(params) {
-  let data = {};
-
   try {
-    console.log("params..start.....", params);
-    // if (params[1] === "favicon.ico") {
-    //   return null; // Returnează null sau orice alt component care indică că pagina nu trebuie să proceseze acest id.
-    // }
-    console.log("params..start.....passed", params);
-    // Interoghează Firestore (sau orice altă bază de date) folosind 'locationPart'
-    let judete = await handleGetFirestore("Judete");
-    let categorii = await handleGetFirestore("Categorii");
-    console.log("here...params...", params);
-    let firme = await getFirme(params, categorii);
-
-    data = { judete, categorii, firme };
-    return data;
+    const [judete, categorii, localitati, firme] = await Promise.all([
+      getCounties(),
+      getServiceCategories(),
+      getCities(),
+      getPublishedCompanies({ limit: 200 }),
+    ]);
+    return { judete, categorii, localitati, firme };
   } catch (error) {
     console.error("Failed to fetch locations:", error);
-    return {
-      props: {
-        error: "Failed to load data.",
-      },
-    };
+    return { judete: [], categorii: [], localitati: [], firme: [] };
   }
 }
 
@@ -92,6 +72,7 @@ const index = async ({ params }) => {
         params={params.clinici}
         judete={data.judete}
         categorii={data.categorii}
+        localitati={data.localitati}
         firme={data.firme}
         h1Title="Cauta firme de amenajari gradini si spatii verzi"
       />

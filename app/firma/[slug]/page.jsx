@@ -1,13 +1,14 @@
 import SliderStyle from "@/components/listing-style/slider-style";
-import {
-  handleGetFirestore,
-  handleQueryFirestore,
-} from "@/utils/firestoreUtils";
-import { transferaImagini } from "@/utils/localProjectlUtils";
 import { notFound } from "next/navigation";
 import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
 import { buildLocalBusinessLd } from "@/utils/schemaOrg";
-import { slugifyFirma } from "@/utils/slugify";
+import {
+  getCompanyBySlug,
+  getCompanySlugs,
+  getCounties,
+  getCities,
+  getServiceCategories,
+} from "@/lib/sanity/queries";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
@@ -15,27 +16,12 @@ const SITE_URL =
 export const revalidate = 60;
 
 async function getFirmaBySlug(slug) {
-  if (!slug) return null;
-  let matches = await handleQueryFirestore("Firme", "slug", slug);
-  if (!matches || matches.length === 0) {
-    // Fallback: derive slug from siteName + localitate for firme without stored slug
-    const all = await handleGetFirestore("Firme");
-    matches = (all || []).filter((f) => slugifyFirma(f) === slug);
-  }
-  if (!matches || matches.length === 0) return null;
-  const [firma] = await transferaImagini([matches[0]]);
-  return firma;
+  return getCompanyBySlug(slug);
 }
 
 export async function generateStaticParams() {
   try {
-    const firme = await handleGetFirestore("Firme");
-    const slugs = new Set();
-    (firme || []).forEach((f) => {
-      const s = f.slug || slugifyFirma(f);
-      if (s) slugs.add(s);
-    });
-    return Array.from(slugs).map((slug) => ({ slug }));
+    return await getCompanySlugs();
   } catch (err) {
     console.error("generateStaticParams firma failed", err);
     return [];
@@ -78,8 +64,11 @@ const Page = async ({ params }) => {
     notFound();
   }
 
-  const judete = await handleGetFirestore("Judete");
-  const categorii = await handleGetFirestore("Categorii");
+  const [judete, categorii, localitati] = await Promise.all([
+    getCounties(),
+    getServiceCategories(),
+    getCities(),
+  ]);
 
   const pagePath = `/firma/${params.slug}`;
   const localBusinessLd = buildLocalBusinessLd(firma, SITE_URL, pagePath);
@@ -103,6 +92,7 @@ const Page = async ({ params }) => {
         params={params.slug}
         judete={judete}
         categorii={categorii}
+        localitati={localitati}
         firme={[firma]}
         renderMode="detail"
         h1Title={firma.siteName}

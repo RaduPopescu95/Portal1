@@ -1,23 +1,20 @@
-import DOMPurify from "isomorphic-dompurify";
+import PortableContent from "@/components/sanity/PortableContent";
 
 const DescriptionsText = ({ firma }) => {
-  // let contentOne = "";
-  // let contentTwo = "";
-  // // Ensure the parameter is destructured if called as a prop
-  // contentOne = DOMPurify.sanitize(firma?.articleContentFirst);
-  // if (firma?.articleContentSecond) {
-  //   contentTwo = DOMPurify.sanitize(firma?.articleContentSecond);
-  // }
   const createMarkup = () => {
-    return { __html: DOMPurify.sanitize(firma?.articleContentFirst) || "" }; // Adding a fallback and optional chaining
+    return { __html: firma?.articleContentFirst || "" };
   };
   const createMarkupSecond = () => {
-    return { __html: DOMPurify.sanitize(firma?.articleContentSecond) || "" }; // Adding a fallback and optional chaining
+    return { __html: firma?.articleContentSecond || "" };
   };
 
   return (
     <>
-      <div dangerouslySetInnerHTML={createMarkup()}></div>
+      {Array.isArray(firma?.articleContentFirst) ? (
+        <PortableContent value={firma.articleContentFirst} />
+      ) : (
+        <div dangerouslySetInnerHTML={createMarkup()}></div>
+      )}
       {firma?.articleContentSecond?.length > 0 && (
         <div dangerouslySetInnerHTML={createMarkupSecond()}></div>
       )}

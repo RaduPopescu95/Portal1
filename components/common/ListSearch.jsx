@@ -1,7 +1,7 @@
 import GlobalFilter from "./GlobalFilter";
 import ListSearchInputs from "./ListSearchInputs";
 
-const ListSearch = ({ className = "", judete, categorii }) => {
+const ListSearch = ({ className = "", judete, categorii, localitati = [] }) => {
   return (
     <div className={`home_adv_srch_opt ${className}`}>
       {/* End nav-pills */}
@@ -13,7 +13,11 @@ const ListSearch = ({ className = "", judete, categorii }) => {
           role="tabpanel"
           aria-labelledby="pills-home-tab"
         >
-          <ListSearchInputs judete={judete} categorii={categorii} />
+          <ListSearchInputs
+            judete={judete}
+            categorii={categorii}
+            localitati={localitati}
+          />
         </div>
         <div
           className="tab-pane fade"

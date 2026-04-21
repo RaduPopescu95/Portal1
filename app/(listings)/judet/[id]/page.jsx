@@ -1,12 +1,10 @@
 import Judete from "../../../../components/judete";
 import {
-  handleQueryFirestore,
-  handleQueryFirestoreSubcollection,
-} from "@/utils/firestoreUtils";
-import {
-  fetchJudeteParams,
-  transferaImagini,
-} from "@/utils/localProjectlUtils";
+  getCitiesByCountySlug,
+  getCompaniesByCountySlug,
+  getCountyBySlug,
+  getCountySlugs,
+} from "@/lib/sanity/queries";
 import { notFound } from "next/navigation";
 import { filtrareOferte } from "@/utils/commonUtils";
 import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
@@ -17,29 +15,19 @@ export const revalidate = 60; // revalidate at most every minute , hour at 3600
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
 
-// Reconstruieste numele real al judetului din slug-ul URL
-// slug "bistrita-nasaud" -> "Bistrita Nasaud"
-function slugToJudetName(slug) {
-  if (!slug) return "";
-  return slug
-    .split("-")
-    .map((w) => (w.length ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w))
-    .join(" ");
-}
-
 export async function generateStaticParams() {
-  let combinatii = await fetchJudeteParams();
-  return combinatii.map((judet) => ({
-    id: judet,
-  }));
+  return await getCountySlugs();
 }
 
 export async function generateMetadata({ params }) {
-  const judetParam = slugToJudetName(params.id);
+  const county = await getCountyBySlug(params.id);
+  const judetParam = county?.name || params.id;
   const title = `Specialisti in peisagistica si gradinarit ${judetParam}`;
-  const description = `Firme serioase de amenajari gradini si spatii verzi din judetul ${judetParam}. Vezi peisagistii recomandati si cere oferta acum.`;
+  const description =
+    county?.seo?.metaDescription ||
+    `Firme serioase de amenajari gradini si spatii verzi din judetul ${judetParam}. Vezi peisagistii recomandati si cere oferta acum.`;
   return {
-    title,
+    title: county?.seo?.metaTitle || title,
     description,
     openGraph: {
       title,
@@ -47,45 +35,29 @@ export async function generateMetadata({ params }) {
       url: `${SITE_URL}/judet/${params.id}`,
     },
     alternates: {
-      canonical: `${SITE_URL}/judet/${params.id}`,
+      canonical: county?.seo?.canonical || `${SITE_URL}/judet/${params.id}`,
     },
+    robots: county?.seo?.noIndex ? { index: false, follow: false } : undefined,
   };
 }
 
 export async function getServerData(params, searchParams) {
-  let data = {};
-  let localitati = [];
-  let firme = [];
-
   try {
-    const judetParam = slugToJudetName(params.id);
-
-    localitati = await handleQueryFirestoreSubcollection(
-      "Localitati",
-      "judet",
-      judetParam
-    );
-
-    firme = await handleQueryFirestore("Firme", "judet", judetParam);
-
-    let firms = await transferaImagini(firme);
-    let firmeFinal = [];
+    const [county, localitati, firms] = await Promise.all([
+      getCountyBySlug(params.id),
+      getCitiesByCountySlug(params.id),
+      getCompaniesByCountySlug(params.id),
+    ]);
+    let firmeFinal = firms;
     if (searchParams) {
       firmeFinal = await filtrareOferte(firms, searchParams);
-    } else {
-      firmeFinal = [...firms];
     }
 
-    data = { localitati, firms: firmeFinal };
+    return { county, localitati, firms: firmeFinal };
   } catch (error) {
     console.error("Failed to fetch data....:", error);
-    return {
-      props: {
-        error: "Failed to load data.",
-      },
-    };
+    return { county: null, localitati: [], firms: [] };
   }
-  return data;
 }
 
 const index = async ({ params, searchParams }) => {
@@ -93,14 +65,13 @@ const index = async ({ params, searchParams }) => {
     return null;
   }
 
-  const judetParam = slugToJudetName(params.id);
-
   const data = await getServerData(params, searchParams.slug);
 
-  if (!data.firms) {
+  if (!data.county) {
     notFound();
   }
 
+  const judetParam = data.county.name;
   const h1Title = `Firme de amenajari gradini si spatii verzi in ${judetParam}`;
 
   const webPageLd = {

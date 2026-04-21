@@ -17,7 +17,6 @@ import {
   handleUpdateFirestore,
   handleUploadFirestore,
 } from "@/utils/firestoreUtils";
-import DOMPurify from "isomorphic-dompurify";
 
 const Index = () => {
   const [formValues, setFormValues] = useState({

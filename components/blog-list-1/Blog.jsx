@@ -1,21 +1,22 @@
 import Link from "next/link";
-import blogContent from "../../data/blogs";
 import Image from "next/image";
 
-const Blog = () => {
+const FALLBACK_IMAGE = "/assets/categorii/amenajari-gradini-si-spatii-verzi.svg";
+
+const Blog = ({ articole = [] }) => {
   return (
     <>
-      {blogContent.map((item) => (
-        <div className="for_blog feat_property" key={item.id}>
+      {articole.map((item) => (
+        <div className="for_blog feat_property" key={item._id || item.slug}>
           <div className="thumb">
-            <Link href={`/blog/${item.id}`}>
+            <Link href={`/blog/${item.slug}`}>
               <Image
                 width={731}
                 height={438}
                 priority
                 className="img-whp cover w-100"
-                src={item.img}
-                alt={item.img}
+                src={item?.image?.finalUri || FALLBACK_IMAGE}
+                alt={item?.image?.alt || item?.siteName || "Articol blog"}
               />
             </Link>
             {/* <div className="blog_tag">{item.postMeta}</div> */}
@@ -25,9 +26,9 @@ const Blog = () => {
           <div className="details">
             <div className="tc_content p10">
               <h4 className="mb15">
-                <Link href={`/blog/${item.id}`}>{item.title}</Link>
+                <Link href={`/blog/${item.slug}`}>{item.siteName}</Link>
               </h4>
-              <p>{item.postDescriptions.slice(0, 285)}</p>
+              <p>{item?.metaDescription?.slice(0, 285)}</p>
             </div>
             {/* End .tc_content */}
 
@@ -36,13 +37,13 @@ const Blog = () => {
                 <li className="list-inline-item">
                   <a href="#">
                     <span className="flaticon-calendar pr10"></span>{" "}
-                    {item.postedDate}
+                    {item.firstUploadDate}
                   </a>
                 </li>
               </ul>
-              <a className="fp_pdate float-end text-thm" href="#">
-                Read More <span className="flaticon-next"></span>
-              </a>
+              <Link className="fp_pdate float-end text-thm" href={`/blog/${item.slug}`}>
+                Citeste mai mult <span className="flaticon-next"></span>
+              </Link>
             </div>
             {/* End fb_footer */}
           </div>

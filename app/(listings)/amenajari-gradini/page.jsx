@@ -1,11 +1,13 @@
 import SliderStyle from "@/components/listing-style/slider-style";
-import { handleGetFirestore } from "@/utils/firestoreUtils";
-
-import { fetchFirme, transferaImagini } from "@/utils/localProjectlUtils";
-import { cache } from "react";
 import { filtrareOferte } from "@/utils/commonUtils";
 import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
 import { buildItemListLd } from "@/utils/schemaOrg";
+import {
+  getCounties,
+  getCities,
+  getPublishedCompanies,
+  getServiceCategories,
+} from "@/lib/sanity/queries";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
@@ -27,41 +29,22 @@ export const metadata = {
 
 export const revalidate = 60; // revalidate at most every minute , hour at 3600
 
-const getFirme = cache(async (params) => {
-  let firme = fetchFirme(params);
-  return firme;
-});
-
 export async function getServerData(params, searchParams) {
-  let data = {};
-
   try {
-    console.log("params..start.....", params);
-    // if (params[1] === "favicon.ico") {
-    //   return null; // Returnează null sau orice alt component care indică că pagina nu trebuie să proceseze acest id.
-    // }
-    console.log("params..start.....passed", params);
-    // Interoghează Firestore (sau orice altă bază de date) folosind 'locationPart'
-    let judete = await handleGetFirestore("Judete");
-    let categorii = await handleGetFirestore("Categorii");
-    console.log("here...params...", params);
-    let firms = await getFirme(params);
-    let firme = await transferaImagini(firms);
-    let firmeFinal = [];
+    const [judete, categorii, localitati, firme] = await Promise.all([
+      getCounties(),
+      getServiceCategories(),
+      getCities(),
+      getPublishedCompanies({ limit: 200 }),
+    ]);
+    let firmeFinal = firme;
     if (searchParams) {
       firmeFinal = await filtrareOferte(firme, searchParams);
-    } else {
-      firmeFinal = [...firme];
     }
-    data = { judete, categorii, firme: firmeFinal };
-    return data;
+    return { judete, categorii, localitati, firme: firmeFinal };
   } catch (error) {
     console.error("Failed to fetch locations:", error);
-    return {
-      props: {
-        error: "Failed to load data.",
-      },
-    };
+    return { judete: [], categorii: [], localitati: [], firme: [] };
   }
 }
 
@@ -94,6 +77,7 @@ const index = async ({ params, searchParams }) => {
         params={params.clinici}
         judete={data.judete}
         categorii={data.categorii}
+        localitati={data.localitati}
         firme={data.firme}
         searchParams={searchParams.slug}
         h1Title="Firme de proiectare, amenajare si intretinere spatii verzi in Romania"
