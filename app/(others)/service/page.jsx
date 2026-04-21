@@ -1,4 +1,3 @@
-import dynamic from "next/dynamic";
 import Service from "@/components/service";
 
 export const metadata = {
@@ -15,4 +14,4 @@ const index = () => {
   );
 };
 
-export default dynamic(() => Promise.resolve(index), { ssr: false });
+export default index;

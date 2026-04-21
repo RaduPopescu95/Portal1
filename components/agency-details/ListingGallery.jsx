@@ -7,6 +7,14 @@ import Image from "next/image";
 
 const ListingGallery = ({ firma }) => {
   console.log("test........", firma);
+  const fallbackAlt = [firma?.siteName, firma?.categorie, firma?.localitate]
+    .filter(Boolean)
+    .join(" - ");
+  const firstImg = firma?.imagini?.imgs?.[0];
+  const firstAlt =
+    (firstImg && firstImg.alt) ||
+    fallbackAlt ||
+    "Imagine firma amenajari gradini";
   return (
     <>
       <Gallery>
@@ -29,7 +37,7 @@ const ListingGallery = ({ firma }) => {
                             height={450}
                             className="img-fluid w100 lds-1 cover h-100"
                             src={firma?.imagini?.imgs[0].finalUri}
-                            alt="1.jpg"
+                            alt={firstAlt}
                           />
                         </div>
                       )}
@@ -62,7 +70,12 @@ const ListingGallery = ({ firma }) => {
                                 height={133}
                                 className="img-fluid w100 cover"
                                 src={val.finalUri}
-                                alt="Gallery image"
+                                alt={
+                                  val.alt ||
+                                  (fallbackAlt
+                                    ? `${fallbackAlt} (${i + 1})`
+                                    : "Imagine firma amenajari gradini")
+                                }
                               />
                             </div>
                           )}

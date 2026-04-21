@@ -1,39 +1,38 @@
-import dynamic from "next/dynamic";
 import AboutUs from "@/components/about-us";
+import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
 
 export const metadata = {
-  title: "Pagina despre noi",
-  description: "Pagina despre noi descriere",
+  title: "Despre noi",
+  description:
+    "Afla mai multe despre FirmeAmenajariGradina.ro – directorul national de firme de amenajari gradini si spatii verzi.",
   openGraph: {
-    title: "Pagina despre noi",
-    description: "Pagina despre noi descriere",
+    title: "Despre noi",
+    description:
+      "Afla mai multe despre FirmeAmenajariGradina.ro – directorul national de firme de amenajari gradini si spatii verzi.",
+    url: "/despre-noi",
   },
   alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/despre-noi`,
-  },
-  manifest: `${process.env.NEXT_PUBLIC_SITE_URL}/manifest.json`,
-  robots: {
-    index: true,
-    follow: true,
+    canonical: "/despre-noi",
   },
 };
 
 const index = () => {
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: `Amenajari Gradini – Amenajari Spatii Verzi – Peisagisti`,
-    // image: product.image,
+    "@type": "AboutPage",
+    name: "Despre FirmeAmenajariGradina.ro",
     description:
-      "Cauti o firma de amenajari gradini care sa amenajeze spatiu tau residential sau sediul companiei tale? Vezi specialistii in amenajari spatii verzi de pe portal.",
+      "Afla mai multe despre FirmeAmenajariGradina.ro – directorul national de firme de amenajari gradini si spatii verzi.",
   };
 
   return (
     <>
-      {/* Add JSON-LD to your page */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <JsonLd data={jsonLd} />
+      <BreadcrumbsJsonLd
+        items={[
+          { name: "Acasa", path: "/" },
+          { name: "Despre noi", path: "/despre-noi" },
+        ]}
       />
 
       <AboutUs />
@@ -41,4 +40,4 @@ const index = () => {
   );
 };
 
-export default dynamic(() => Promise.resolve(index), { ssr: false });
+export default index;

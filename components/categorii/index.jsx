@@ -51,9 +51,11 @@ const index = ({ localitati, firme, judet, params }) => {
             <div className="col-lg-12">
               <div className="home_content listing slider_style pt30">
                 <div className="home-text home6 text-center">
-                  <h2 className="fz50 color-white">
-                    Descopera funizori de servicii autorizati
-                  </h2>
+                  <h1 className="fz50 color-white">
+                    {judet
+                      ? `Descopera furnizori de servicii in ${judet}`
+                      : "Descopera furnizori de servicii autorizati"}
+                  </h1>
                 </div>
                 {/* End home-text */}
                 <ListSearchJudete

@@ -1,4 +1,3 @@
-import dynamic from "next/dynamic";
 import HomeMain from "@/components/home-4";
 import { handleGetFirestore } from "@/utils/firestoreUtils";
 import { fetchFirme } from "@/utils/localProjectlUtils";
@@ -55,4 +54,4 @@ const index = async () => {
   );
 };
 
-export default dynamic(() => Promise.resolve(index), { ssr: false });
+export default index;

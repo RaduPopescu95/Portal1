@@ -1,152 +1,166 @@
-import dynamic from "next/dynamic";
-import Categorii from "../../components/categorii";
 import SliderStyle from "@/components/listing-style/slider-style";
-// import { unstable_noStore as noStore } from "next/cache";
 import {
   handleGetFirestore,
-  handleQueryFirestore,
-  handleQueryFirestoreSubcollection,
 } from "@/utils/firestoreUtils";
 import {
   fetchFirme,
   fetchFirmeParams,
   transferaImagini,
 } from "@/utils/localProjectlUtils";
-// import { cache } from "react";
 import { notFound } from "next/navigation";
 import { filtrareOferte } from "@/utils/commonUtils";
+import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
+import { buildItemListLd } from "@/utils/schemaOrg";
+import { replaceDashesWithSpaces } from "@/utils/strintText";
 
-export const revalidate = 60; // revalidate at most every minute , hour at 3600
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
 
-//FOLOSIM CACHE PENTRU A DEACTIVA DUPLICAREA FUNCTIEI DE GET DIN FIRESTORE (DACA ESTE FOLOSIT FETCH SE POATE FOLOSI SI SERVER COMPONENT SI IN GET METADATA DINAMIC)
+export const revalidate = 60;
+
 const getFirme = async (params, cats) => {
   let firme = fetchFirme(params, cats);
   return firme;
 };
-// const getFirme = cache(async (params, cats) => {
-//   let firme = fetchFirme(params, cats);
-//   return firme;
-// });
 
 export async function generateStaticParams() {
   let combinatii = await fetchFirmeParams();
-  console.log("combinatii...firme....", combinatii);
   return combinatii.map((post) => ({
-    clinci: post,
+    clinici: post,
   }));
 }
 
-export async function generateMetadata({ params, searchParams }, parent) {
-  // read route params
-  const id = params.clinici;
-
-  // fetch data
-
-  let firms = await getFirme(params);
-
-  let firme = await transferaImagini(firms);
-  let firmeFinal = [];
-  console.log("test here....", searchParams);
-  if (false) {
-    // console.log("test here....is slug", searchParams.slug);
-    // firmeFinal = await filtrareOferte(firme, searchParams.slug);
-  } else {
-    console.log("test here....no is slug");
-    firmeFinal = [...firme];
+function deriveCategorieLocalitate(clinici, categorii) {
+  const parts = (clinici || "").split("-");
+  const catSlugs = (categorii || []).map((cat) =>
+    (cat.siteName || "").toLowerCase().replace(/\s+/g, "-")
+  );
+  catSlugs.push("clinici");
+  let matched = "";
+  let matchedIndex = -1;
+  for (let i = 0; i < parts.length; i++) {
+    const potential = parts.slice(0, i + 1).join("-");
+    if (catSlugs.includes(potential)) {
+      matched = potential;
+      matchedIndex = i;
+    }
   }
-
-  console.log("firme....just one...", firme);
+  const localitate = parts.slice(matchedIndex + 1).join("-");
   return {
-    title: `${firme[0]?.metaTitle || ""}`,
-    description: `${firme[0]?.metaDescription || ""}`,
-    openGraph: {
-      images: [
-        {
-          url: firme[0]?.imagini?.imgs[0]?.finalUri || "",
-        },
-      ],
-    },
-    // alternates: {
-    //   canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/${id}`,
-    // },
-    // manifest: `${process.env.NEXT_PUBLIC_SITE_URL}/manifest.json`,
-    // robots: {
-    //   index: true,
-    //   follow: true,
-    // },
+    categorieSlug: matched,
+    categorie: replaceDashesWithSpaces(matched),
+    localitateSlug: localitate,
+    localitate: replaceDashesWithSpaces(localitate),
   };
-
-  // optionally access and extend (rather than replace) parent metadata
-  // const previousImages = (await parent).openGraph?.images || [];
 }
 
-export async function getServerData(params, searchParams) {
-  let data = {};
+export async function generateMetadata({ params }) {
+  const categorii = await handleGetFirestore("Categorii");
+  const { categorie, localitate } = deriveCategorieLocalitate(
+    params.clinici,
+    categorii
+  );
+
+  const firms = await getFirme(params, categorii);
+  const count = Array.isArray(firms) ? firms.length : 0;
+
+  const prettyCat = (categorie || "servicii").toLowerCase();
+  const prettyLoc = localitate
+    ? localitate.charAt(0).toUpperCase() + localitate.slice(1)
+    : "";
+
+  const title = prettyLoc
+    ? `Firme de ${prettyCat} in ${prettyLoc} (${count}) – FirmeAmenajariGradina.ro`
+    : `Firme de ${prettyCat} – FirmeAmenajariGradina.ro`;
+  const description = prettyLoc
+    ? `Vezi ${count} firme de ${prettyCat} in ${prettyLoc}. Contact, servicii si recenzii verificate pe FirmeAmenajariGradina.ro.`
+    : `Vezi firme de ${prettyCat} recomandate pe FirmeAmenajariGradina.ro.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `/${params.clinici}`,
+    },
+    alternates: {
+      canonical: `/${params.clinici}`,
+    },
+  };
+}
+
+async function getServerData(params, searchParams) {
   try {
-    console.log("params..start.....", params);
-    // if (params[1] === "favicon.ico") {
-    //   return null; // Returnează null sau orice alt component care indică că pagina nu trebuie să proceseze acest id.
-    // }
-    console.log("params..start.....passed", params);
-    // Interoghează Firestore (sau orice altă bază de date) folosind 'locationPart'
-    let judete = await handleGetFirestore("Judete");
-    let categorii = await handleGetFirestore("Categorii");
-    console.log("here...params...", params);
-    let firms = await getFirme(params, categorii);
-
-    let firme = await transferaImagini(firms);
-    let firmeFinal = [];
-    if (false) {
-      firmeFinal = await filtrareOferte(firme, searchParams);
-    } else {
-      firmeFinal = [...firme];
-    }
-
-    data = { judete, categorii, firme: firmeFinal };
-    return data;
+    const judete = await handleGetFirestore("Judete");
+    const categorii = await handleGetFirestore("Categorii");
+    const firms = await getFirme(params, categorii);
+    const firme = await transferaImagini(firms);
+    const firmeFinal = [...firme];
+    return { judete, categorii, firme: firmeFinal };
   } catch (error) {
     console.error("Failed to fetch locations:", error);
-    return {
-      props: {
-        error: "Failed to load data.",
-      },
-    };
+    return { judete: [], categorii: [], firme: [] };
   }
 }
 
 const index = async ({ params, searchParams = null }) => {
-  // noStore();
-  console.log("params...in...clinici", params);
-  console.log("searchParams....", searchParams);
-  //searchParams.slug provoaca eroarea DynamicServerError, cumva forteaza pagina dorita statica in pagina dinamica
   const data = await getServerData(params);
-  console.log("data....here..", data.firme);
-  if (data.firme.length === 0) {
+  if (!data.firme || data.firme.length === 0) {
     notFound();
   }
-  const jsonLd = {
+
+  const { categorie, localitate } = deriveCategorieLocalitate(
+    params.clinici,
+    data.categorii
+  );
+
+  const pagePath = `/${params.clinici}`;
+  const prettyCat = (categorie || "amenajari gradini").toLowerCase();
+  const prettyLoc = localitate
+    ? localitate.charAt(0).toUpperCase() + localitate.slice(1)
+    : "";
+  const h1Title = prettyLoc
+    ? `Firme de ${prettyCat} in ${prettyLoc}`
+    : `Firme de ${prettyCat}`;
+
+  const webPageLd = {
     "@context": "https://schema.org",
-    "@type": "Article",
-    name: data.firme[0]?.metaTitle,
-    // image: product.image,
-    description: data.firme[0]?.metaDescription,
+    "@type": "WebPage",
+    name: h1Title,
+    url: `${SITE_URL}${pagePath}`,
+    description: `Lista firmelor de ${prettyCat}${
+      prettyLoc ? ` din ${prettyLoc}` : ""
+    } listate pe FirmeAmenajariGradina.ro.`,
   };
+
+  const itemListLd = buildItemListLd(data.firme, SITE_URL);
+
+  const breadcrumbs = [{ name: "Acasa", path: "/" }];
+  const primaFirma = data.firme[0];
+  if (primaFirma?.judet) {
+    breadcrumbs.push({
+      name: primaFirma.judet,
+      path: `/judet/${primaFirma.judet.toLowerCase().replace(/ /g, "-")}`,
+    });
+  }
+  breadcrumbs.push({ name: h1Title, path: pagePath });
 
   return (
     <>
-      {/* Add JSON-LD to your page */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={webPageLd} />
+      <JsonLd data={itemListLd} />
+      <BreadcrumbsJsonLd items={breadcrumbs} />
       <SliderStyle
         params={params.clinici}
         judete={data.judete}
         categorii={data.categorii}
         firme={data.firme}
+        renderMode="listing"
+        h1Title={h1Title}
       />
     </>
   );
 };
 
-export default dynamic(() => Promise.resolve(index), { ssr: false });
+export default index;

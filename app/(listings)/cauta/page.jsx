@@ -1,4 +1,3 @@
-import dynamic from "next/dynamic";
 import SliderStyle from "@/components/listing-style/slider-style";
 import { unstable_noStore as noStore } from "next/cache";
 import {
@@ -9,23 +8,24 @@ import {
 import { fetchFirme } from "@/utils/localProjectlUtils";
 
 import { cache } from "react";
+import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
+import { buildItemListLd } from "@/utils/schemaOrg";
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
 
 export const metadata = {
-  title: "Firma Amenajari Spatii Verzi",
+  title: "Cauta firme de amenajari spatii verzi",
   description:
     "Cauta un furnizor de servicii de amenajari spatii verzi in apropiere si solicita o oferta personalizata.",
   openGraph: {
-    title: "Firma Amenajari Spatii Verzi",
+    title: "Cauta firme de amenajari spatii verzi",
     description:
       "Cauta un furnizor de servicii de amenajari spatii verzi in apropiere si solicita o oferta personalizata.",
+    url: "/cauta",
   },
   alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/cauta`,
-  },
-  manifest: `${process.env.NEXT_PUBLIC_SITE_URL}/manifest.json`,
-  robots: {
-    index: true,
-    follow: true,
+    canonical: "/cauta",
   },
 };
 
@@ -64,22 +64,28 @@ export async function getServerData(params) {
 }
 
 const index = async ({ params }) => {
-  const jsonLd = {
+  const data = await getServerData(params);
+
+  const webPageLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "Firma Amenajari Spatii Verzi",
-    // image: product.image,
+    name: "Cauta firme de amenajari spatii verzi",
     description:
       "Cauta un furnizor de servicii de amenajari spatii verzi in apropiere si solicita o oferta personalizata.",
+    url: `${SITE_URL}/cauta`,
   };
 
-  const data = await getServerData(params);
+  const itemListLd = buildItemListLd(data.firme, SITE_URL);
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <JsonLd data={webPageLd} />
+      <JsonLd data={itemListLd} />
+      <BreadcrumbsJsonLd
+        items={[
+          { name: "Acasa", path: "/" },
+          { name: "Cauta", path: "/cauta" },
+        ]}
       />
 
       <SliderStyle
@@ -87,9 +93,10 @@ const index = async ({ params }) => {
         judete={data.judete}
         categorii={data.categorii}
         firme={data.firme}
+        h1Title="Cauta firme de amenajari gradini si spatii verzi"
       />
     </>
   );
 };
 
-export default dynamic(() => Promise.resolve(index), { ssr: false });
+export default index;

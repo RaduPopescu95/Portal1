@@ -28,7 +28,20 @@ import { fetchFirme } from "@/utils/localProjectlUtils";
 
 import { notFound } from "next/navigation";
 
-const index = async ({ params, categorii, firme, judete, searchParams }) => {
+const index = async ({
+  params,
+  categorii,
+  firme,
+  judete,
+  searchParams,
+  h1Title,
+  renderMode, // "home" | "listing" | "detail" (defaults by params presence)
+}) => {
+  const pageH1 =
+    h1Title ||
+    "Firme de proiectare, amenajare si intretinere spatii verzi";
+  const mode = renderMode || (params ? "detail" : "home");
+  const hideHero = mode !== "home";
   // if (!data.firme) {
   //   notFound();
   // }
@@ -44,10 +57,10 @@ const index = async ({ params, categorii, firme, judete, searchParams }) => {
       {/* <!-- Modal --> */}
       <PopupSignInUp />
 
-      {params && <BreadCrumbBanner />}
+      {hideHero && <BreadCrumbBanner title={pageH1} />}
 
       {/* <!-- 6th Home Design --> */}
-      {!params && (
+      {!hideHero && (
         <section className="home-listing-slider hight-fx p0">
           <div className="container-fluid p0">
             <div className="row">
@@ -67,9 +80,7 @@ const index = async ({ params, categorii, firme, judete, searchParams }) => {
                 <div className="home_content listing slider_style pt30">
                   <BreadCrumb csName={"color-white"} />
                   <div className="home-text home6 text-center">
-                    <h1 className="fz40 color-white">
-                      Firme de proiectare, amenajare si intretinere spatii verzi
-                    </h1>
+                    <h1 className="fz40 color-white">{pageH1}</h1>
                   </div>
                   {/* End home-text */}
                   <ListSearch
@@ -95,6 +106,7 @@ const index = async ({ params, categorii, firme, judete, searchParams }) => {
                   params={params}
                   firme={firme}
                   searchParams={searchParams}
+                  renderMode={mode}
                 />
               </div>
               {/* End .row */}

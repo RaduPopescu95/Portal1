@@ -19,16 +19,39 @@ export function getCurrentDateTime() {
   };
 }
 
-export function parseDateToISO(dateString) {
-  // Split 'dd-mm-yyyy' to parts
-  const parts = dateString.split("-");
-  const day = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10) - 1; // Adjust month to be 0-indexed
-  const year = parseInt(parts[2], 10);
+export function parseDateToISO(dateInput) {
+  if (!dateInput) return null;
+  try {
+    if (
+      typeof dateInput === "object" &&
+      typeof dateInput.toDate === "function"
+    ) {
+      return dateInput.toDate().toISOString();
+    }
+    if (dateInput instanceof Date) {
+      return isNaN(dateInput.getTime()) ? null : dateInput.toISOString();
+    }
 
-  // Create a new Date instance in UTC
-  const date = new Date(Date.UTC(year, month, day));
+    const str = String(dateInput).trim();
+    if (!str) return null;
 
-  // Return date in ISO format
-  return date.toISOString();
+    if (str.includes("T") || /^\d{4}-\d{2}-\d{2}$/.test(str)) {
+      const iso = new Date(str);
+      if (!isNaN(iso.getTime())) return iso.toISOString();
+    }
+
+    const parts = str.split("-");
+    if (parts.length !== 3) return null;
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const year = parseInt(parts[2], 10);
+    if (!day || !month || !year) return null;
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+
+    const date = new Date(Date.UTC(year, month - 1, day));
+    return isNaN(date.getTime()) ? null : date.toISOString();
+  } catch (err) {
+    console.warn("[parseDateToISO] invalid input", dateInput, err);
+    return null;
+  }
 }

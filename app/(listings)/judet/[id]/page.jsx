@@ -1,4 +1,3 @@
-import dynamic from "next/dynamic";
 import Judete from "../../../../components/judete";
 import {
   handleQueryFirestore,
@@ -10,38 +9,45 @@ import {
 } from "@/utils/localProjectlUtils";
 import { notFound } from "next/navigation";
 import { filtrareOferte } from "@/utils/commonUtils";
+import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
+import { buildItemListLd } from "@/utils/schemaOrg";
 
 export const revalidate = 60; // revalidate at most every minute , hour at 3600
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
+
+// Reconstruieste numele real al judetului din slug-ul URL
+// slug "bistrita-nasaud" -> "Bistrita Nasaud"
+function slugToJudetName(slug) {
+  if (!slug) return "";
+  return slug
+    .split("-")
+    .map((w) => (w.length ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w))
+    .join(" ");
+}
+
 export async function generateStaticParams() {
   let combinatii = await fetchJudeteParams();
-  console.log("combinatii...", combinatii);
   return combinatii.map((judet) => ({
     id: judet,
   }));
 }
 
-export async function generateMetadata({ params, searchParams }, parent) {
-  // read route params
-  let parts = params.id.split("-"); // Împărțim ID-ul în părți bazat pe separatorul '-'
-  let judet = parts[0]; // Folosim prima parte pentru interogări
-  let judetParam =
-    judet.charAt(0).toUpperCase() + judet?.slice(1).toLowerCase();
-  console.log("judetparam...", judetParam);
+export async function generateMetadata({ params }) {
+  const judetParam = slugToJudetName(params.id);
+  const title = `Specialisti in peisagistica si gradinarit ${judetParam}`;
+  const description = `Firme serioase de amenajari gradini si spatii verzi din judetul ${judetParam}. Vezi peisagistii recomandati si cere oferta acum.`;
   return {
-    title: `Specialisti In Peisagistica Si Gradinarit  ${judetParam}`,
-    description: `Aici vei gasi firme seriose, care iti vor amenaja spatiul verde rezidential sau comercial asa cum ti l-ai dorit intotdeauna. Vezi firme acum!`,
+    title,
+    description,
     openGraph: {
-      title: `Specialisti In Peisagistica Si Gradinarit  ${judetParam}`,
-      description: `Aici vei gasi firme seriose, care iti vor amenaja spatiul verde rezidential sau comercial asa cum ti l-ai dorit intotdeauna. Vezi firme acum!`,
+      title,
+      description,
+      url: `${SITE_URL}/judet/${params.id}`,
     },
     alternates: {
-      canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/${judet}`,
-    },
-    manifest: `${process.env.NEXT_PUBLIC_SITE_URL}/manifest.json`,
-    robots: {
-      index: true,
-      follow: true,
+      canonical: `${SITE_URL}/judet/${params.id}`,
     },
   };
 }
@@ -52,34 +58,17 @@ export async function getServerData(params, searchParams) {
   let firme = [];
 
   try {
-    let parts = params.id; // Împărțim ID-ul în părți bazat pe separatorul '-'
-    let judet = parts; // Folosim prima parte pentru interogări
-    let judetParam =
-      judet.charAt(0).toUpperCase() + judet?.slice(1).toLowerCase();
+    const judetParam = slugToJudetName(params.id);
 
-    // Interoghează Firestore (sau orice altă bază de date) folosind 'judetParam'
     localitati = await handleQueryFirestoreSubcollection(
       "Localitati",
       "judet",
       judetParam
     );
-    console.log("judet...alta...", localitati);
-    // query zone
-    // if (parts[1]) {
-    //   let localitateParam =
-    //     parts[1].charAt(0).toUpperCase() + parts[1].slice(1).toLowerCase();
-    //   firme = await handleQueryFirestore(
-    //     "Firme",
-    //     "localitate",
-    //     localitateParam
-    //   );
-    // } else {
+
     firme = await handleQueryFirestore("Firme", "judet", judetParam);
-    // }
-    // query zone
 
     let firms = await transferaImagini(firme);
-    console.log("judetParam....", searchParams);
     let firmeFinal = [];
     if (searchParams) {
       firmeFinal = await filtrareOferte(firms, searchParams);
@@ -96,44 +85,50 @@ export async function getServerData(params, searchParams) {
       },
     };
   }
-  return data; // Datele vor fi disponibile ca props în componentă
+  return data;
 }
 
 const index = async ({ params, searchParams }) => {
-  let parts = params.id;
-  let judet = parts; // Folosim prima parte pentru interogări
-  if (judet === "favicon.ico") {
-    return null; // Returnează null sau orice alt component care indică că pagina nu trebuie să proceseze acest id.
+  if (params.id === "favicon.ico") {
+    return null;
   }
-  console.log("judet...", judet);
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: `Specialisti In Peisagistica Si Gradinarit  ${judet}`,
-    // image: product.image,
-    description:
-      "Aici vei gasi firme seriose, care iti vor amenaja spatiul verde rezidential sau comercial asa cum ti l-ai dorit intotdeauna. Vezi firme acum!",
-  };
-  const data = await getServerData(params, searchParams.slug);
 
-  console.log("judete....firms...", data.firms);
+  const judetParam = slugToJudetName(params.id);
+
+  const data = await getServerData(params, searchParams.slug);
 
   if (!data.firms) {
     notFound();
   }
 
+  const h1Title = `Firme de amenajari gradini si spatii verzi in ${judetParam}`;
+
+  const webPageLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: `Specialisti in peisagistica si gradinarit ${judetParam}`,
+    description: `Firme serioase de amenajari gradini si spatii verzi din judetul ${judetParam}.`,
+    url: `${SITE_URL}/judet/${params.id}`,
+  };
+
+  const itemListLd = buildItemListLd(data.firms, SITE_URL);
+
   return (
     <>
-      {/* Add JSON-LD to your page */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <JsonLd data={webPageLd} />
+      <JsonLd data={itemListLd} />
+      <BreadcrumbsJsonLd
+        items={[
+          { name: "Acasa", path: "/" },
+          { name: "Judete", path: "/amenajari-gradini" },
+          { name: judetParam, path: `/judet/${params.id}` },
+        ]}
       />
-      {/* ... */}
 
       <Judete
         data={data}
-        judet={judet}
+        judet={judetParam}
+        h1Title={h1Title}
         params={params}
         searchParams={searchParams.slug}
       />
@@ -141,6 +136,4 @@ const index = async ({ params, searchParams }) => {
   );
 };
 
-// ES LINT COMAND npx eslint --fix D:\NextJs\Portal\Portal\functions
-
-export default dynamic(() => Promise.resolve(index), { ssr: false });
+export default index;

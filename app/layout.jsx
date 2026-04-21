@@ -5,57 +5,97 @@ import { store } from "../store/store";
 // import ScrollToTop from "@/components/common/ScrollTop";
 import "../public/assets/scss/index.scss";
 import { Nunito } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 // import CookieBanner from "@/components/Cookies/CookieBanner";
 // import { AuthProvider } from "@/context/AuthContext";
 // import { LoadScript } from "@react-google-maps/api";
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
+
 export const metadata = {
   title: {
-    default: "Amenajari Gradini – Amenajari Spatii Verzi – Peisagisti",
-    template: "%s - Amenajari Gradini – Amenajari Spatii Verzi – Peisagisti",
+    default:
+      "Firme Amenajari Gradini si Spatii Verzi | Peisagisti Romania",
+    template: "%s | FirmeAmenajariGradina.ro",
   },
-  description: "Descriere din root layout",
+  description:
+    "Director national cu firme de amenajari gradini, peisagisti si servicii de intretinere spatii verzi. Gaseste specialisti din orasul tau.",
+  applicationName: "FirmeAmenajariGradina.ro",
+  keywords: [
+    "amenajari gradini",
+    "peisagisti",
+    "amenajari spatii verzi",
+    "firme gradinarit",
+    "proiectare gradini",
+    "intretinere spatii verzi",
+  ],
+  authors: [{ name: "FirmeAmenajariGradina.ro" }],
+  creator: "FirmeAmenajariGradina.ro",
+  publisher: "FirmeAmenajariGradina.ro",
+  referrer: "origin-when-cross-origin",
+  metadataBase: new URL(SITE_URL),
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "Amenajari Gradini – Amenajari Spatii Verzi – Peisagisti",
-    description: "%s - Amenajari Gradini – Amenajari Spatii Verzi – Peisagisti",
-    url: "https://nextjs.org/",
-    siteName: "Nume site",
+    type: "website",
+    locale: "ro_RO",
+    url: "/",
+    siteName: "FirmeAmenajariGradina.ro",
+    title:
+      "Firme Amenajari Gradini si Spatii Verzi | Peisagisti Romania",
+    description:
+      "Director national cu firme de amenajari gradini, peisagisti si servicii de intretinere spatii verzi.",
     images: [
       {
-        url: "https://nextjs.org/og.png",
-        width: 800,
-        height: 600,
+        url: "/og-default.jpg",
+        width: 1200,
+        height: 630,
+        alt: "FirmeAmenajariGradina.ro",
       },
     ],
-    type: "website",
   },
-  robots: {
-    index: true,
-    follow: true,
+  twitter: {
+    card: "summary_large_image",
+    title:
+      "Firme Amenajari Gradini si Spatii Verzi | Peisagisti Romania",
+    description:
+      "Director national cu firme de amenajari gradini, peisagisti si servicii de intretinere spatii verzi.",
+    images: ["/og-default.jpg"],
   },
-  applicationName: "Portalul tau",
-  authors: [{ name: "Pro Web" }],
-  generator: "Next.js",
-  keywords: ["Portal", "Amenajari Gradini"],
-  referrer: "origin-when-cross-origin",
-  creator: "Pro web",
-  publisher: "Pro web",
-  metadataBase: new URL(`${process.env.NEXT_PUBLIC_SITE_URL}/`),
-  manifest: `${process.env.NEXT_PUBLIC_SITE_URL}/manifest.json`,
+  // Icons: favicon is provided via app/favicon.ico (file-based convention).
+  // apple-touch-icon is emitted as a manual <link> in <head> below because
+  // Next.js ignores metadata.icons when app/favicon.ico exists.
+  manifest: "/manifest.json",
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+  },
+  // robots: NU se seteaza aici; app/robots.js gestioneaza global.
 };
 
-// If loading a variable font, you don't need to specify the font weight
 const nunito = Nunito({
-  weight: ["200", "300", "400", "600", "700", "800", "900"],
+  weight: ["400", "600", "700"],
   subsets: ["latin"],
+  display: "swap",
 });
 
 export default function RootLayout({ children }) {
   const libraries = ["places"];
   return (
-    <html lang="en">
+    <html lang="ro">
       <head>
-        <link rel="icon" href="./favicon.ico" />
+        <link
+          rel="preconnect"
+          href="https://firebasestorage.googleapis.com"
+        />
+        <link
+          rel="dns-prefetch"
+          href="https://firebasestorage.googleapis.com"
+        />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
       </head>
       <body className={nunito.className}>
         {/* <LoadScript
@@ -67,6 +107,9 @@ export default function RootLayout({ children }) {
         {/* </AuthProvider> */}
         {/* </LoadScript> */}
         {/* <ScrollToTop /> */}
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+        )}
       </body>
     </html>
   );

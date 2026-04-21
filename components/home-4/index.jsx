@@ -171,10 +171,10 @@ const index = async ({ firme, articole, categorii }) => {
             <div className="col-md-6 col-lg-4 order-1 order-md-2">
               <div className="our_hotoffer">
                 <Image
-                  src="/assets/alege-firma.svg" // Calea relativă la directorul public
-                  alt="Tooth Icon" // Adaugă un text alternativ pentru accesibilitate
-                  width={400} // Specifică lățimea dorită
-                  height={400} // Specifică înălțimea dorită
+                  src="/assets/alege-firma.svg"
+                  alt="Alege o firma de amenajari gradini"
+                  width={400}
+                  height={400}
                   className="img-whp"
                 />
               </div>
@@ -191,10 +191,10 @@ const index = async ({ firme, articole, categorii }) => {
             <div className="col-md-6 col-lg-4">
               <div className="our_hotoffer">
                 <Image
-                  src="/assets/programare.svg" // Calea relativă la directorul public
-                  alt="Tooth Icon" // Adaugă un text alternativ pentru accesibilitate
-                  width={400} // Specifică lățimea dorită
-                  height={400} // Specifică înălțimea dorită
+                  src="/assets/programare.svg"
+                  alt="Solicita o oferta pentru amenajare gradina"
+                  width={400}
+                  height={400}
                   className="img-whp"
                 />
               </div>

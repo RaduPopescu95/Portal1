@@ -19,6 +19,7 @@ import { useParams, useRouter } from "next/navigation";
 import { uploadImage } from "@/utils/storageUtils";
 import CommonLoader from "@/components/common/CommonLoader";
 import DOMPurify from "isomorphic-dompurify";
+import { validateMetaFields } from "@/utils/seoValidation";
 
 const Index = () => {
   const [formValues, setFormValues] = useState({
@@ -99,6 +100,17 @@ const Index = () => {
     setIsLoading(true);
     console.log("Submitting form with values:", formValues);
     console.log("propertySelectedImgs:", propertySelectedImgs);
+
+    const metaErrors = validateMetaFields({
+      metaTitle: formValues.metaTitle,
+      metaDescription: formValues.metaDescription,
+    });
+    if (metaErrors.length) {
+      setSuccessMessage(metaErrors.join(" / "));
+      setIsLoading(false);
+      return;
+    }
+
     if (propertySelectedImgs.length === 0) {
       console.log("No image length...");
       setSuccessMessage("Nu este adaugata imagine");

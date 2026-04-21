@@ -25,6 +25,8 @@ import { useParams, useRouter } from "next/navigation";
 import CommonLoader from "@/components/common/CommonLoader";
 import { uploadImage, uploadMultipleImages } from "@/utils/storageUtils";
 import DOMPurify from "isomorphic-dompurify";
+import { validateMetaFields } from "@/utils/seoValidation";
+import { slugify, slugifyFirma } from "@/utils/slugify";
 
 const Index = () => {
   // Adăugarea unui nou state pentru mesajul de succes
@@ -45,9 +47,26 @@ const Index = () => {
   const [isLoadingImages, setIsLoadingImages] = useState(false);
   const [logoImg, setLogoImg] = useState([]);
   const [imaginiData, setImaginiData] = useState({});
+  const [imgAlts, setImgAlts] = useState({});
+
+  const altKeyFor = (item) => {
+    if (!item) return "";
+    if (item instanceof File) return item.name;
+    return item.fileName || item.finalUri || "";
+  };
+
+  const handleAltChange = (key, value) => {
+    setImgAlts((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleRegenerateSlug = () => {
+    const next = slugifyFirma(formValues);
+    setFormValues((prev) => ({ ...prev, slug: next }));
+  };
 
   const [formValues, setFormValues] = useState({
     siteName: "",
+    slug: "",
     metaTitle: "",
     metaDescription: "",
     articleContentFirst: "",
@@ -82,13 +101,32 @@ const Index = () => {
 
   // multiple image select
   const multipleImage = (e) => {
-    // checking is same file matched with old stored array
+    const newFiles = selectedFiles(e) || [];
     const isExist = propertySelectedImgs?.some((file1) =>
-      selectedFiles(e)?.some((file2) => file1.name === file2.name)
+      newFiles?.some((file2) => file1.name === file2.name)
     );
 
     if (!isExist) {
-      setPropertySelectedImgs((old) => [...old, ...selectedFiles(e)]);
+      const baseAlt = [
+        formValues.siteName,
+        formValues.categorie,
+        formValues.localitate,
+      ]
+        .filter(Boolean)
+        .join(" - ");
+      setImgAlts((prev) => {
+        const next = { ...prev };
+        const startIdx = propertySelectedImgs?.length || 0;
+        newFiles.forEach((file, i) => {
+          if (!next[file.name]) {
+            next[file.name] = baseAlt
+              ? `${baseAlt} (${startIdx + i + 1})`
+              : "";
+          }
+        });
+        return next;
+      });
+      setPropertySelectedImgs((old) => [...old, ...newFiles]);
       setIsNewImage(true);
     } else {
       alert("You have selected one image already!");
@@ -147,7 +185,7 @@ const Index = () => {
     console.log(name);
     setFormValues((prevState) => ({
       ...prevState,
-      [name]: value,
+      [name]: name === "slug" ? slugify(value) : value,
     }));
     console.log(formValues);
   };
@@ -166,7 +204,16 @@ const Index = () => {
       console.log("is galerie foto id field...", imagini);
       if (imagini.length > 0) {
         setImaginiData(imagini[0]);
-        setPropertySelectedImgs([...imagini[0].imagini.imgs]);
+        const loadedImgs = imagini[0].imagini?.imgs || [];
+        setPropertySelectedImgs([...loadedImgs]);
+        setImgAlts((prev) => {
+          const next = { ...prev };
+          loadedImgs.forEach((img) => {
+            const key = img.fileName || img.finalUri;
+            if (key && next[key] === undefined) next[key] = img.alt || "";
+          });
+          return next;
+        });
       } else {
         setImaginiData((prevState) => ({
           [name]: value,
@@ -220,6 +267,49 @@ const Index = () => {
 
     setIsLoading(true);
     console.log("Submitting form with values:", formValues);
+
+    const metaErrors = validateMetaFields({
+      metaTitle: formValues.metaTitle,
+      metaDescription: formValues.metaDescription,
+    });
+    if (metaErrors.length) {
+      setSuccessMessage(metaErrors.join(" / "));
+      setIsLoading(false);
+      return;
+    }
+
+    let finalSlug = slugify(formValues.slug || "");
+    if (!finalSlug) {
+      finalSlug = slugifyFirma(formValues);
+    }
+    if (!finalSlug) {
+      setSuccessMessage(
+        "Slug invalid. Completeaza Nume si Localitate inainte de salvare."
+      );
+      setIsLoading(false);
+      return;
+    }
+    try {
+      const existing = await handleQueryFirestore(
+        "Firme",
+        "slug",
+        finalSlug
+      );
+      const conflict = (existing || []).find(
+        (f) => f.documentId !== documentId
+      );
+      if (conflict) {
+        setSuccessMessage(
+          `Slug "${finalSlug}" exista deja. Te rog alege alt slug.`
+        );
+        setIsLoading(false);
+        return;
+      }
+    } catch (err) {
+      console.warn("Slug uniqueness check failed, continuing", err);
+    }
+    formValues.slug = finalSlug;
+
     if (propertySelectedImgs.length === 0 && !formValues.idGalerieFoto) {
       console.log("No image length...");
       setSuccessMessage("Nu sunt adaugate imagini");
@@ -249,7 +339,8 @@ const Index = () => {
             propertySelectedImgs,
             isEdit,
             "ImaginiFirme",
-            deletedImages
+            deletedImages,
+            imgAlts
           );
         }
         console.log("formValues....", formValues);
@@ -278,7 +369,8 @@ const Index = () => {
             propertySelectedImgs,
             false,
             "ImaginiFirme",
-            deletedImages
+            deletedImages,
+            imgAlts
           );
         } else {
           const imgs = [];
@@ -308,6 +400,7 @@ const Index = () => {
       // Resetarea formularului
       setFormValues({
         siteName: "",
+        slug: "",
         metaTitle: "",
         metaDescription: "",
         articleContentFirst: "",
@@ -347,6 +440,7 @@ const Index = () => {
   const handleReset = () => {
     setFormValues({
       siteName: "",
+      slug: "",
       metaTitle: "",
       metaDescription: "",
       articleContentFirst: "",
@@ -386,9 +480,16 @@ const Index = () => {
       console.log("course...found..", c);
       console.log("imagini...found..", imagini);
       setImaginiData(imagini[0]);
-      setPropertySelectedImgs(
-        imagini[0].imagini.imgs || imagini[0].imagini.imgs
-      );
+      const loadedImgs = imagini[0]?.imagini?.imgs || [];
+      setPropertySelectedImgs(loadedImgs);
+      setImgAlts((prev) => {
+        const next = { ...prev };
+        loadedImgs.forEach((img) => {
+          const key = img.fileName || img.finalUri;
+          if (key && next[key] === undefined) next[key] = img.alt || "";
+        });
+        return next;
+      });
       // Presupunând că `c` este un obiect care conține datele necesare,
       // actualizează state-ul `formValues` cu aceste date.
       // Asigură-te că structura obiectului `c` corespunde cu cea a `formValues`.
@@ -396,6 +497,7 @@ const Index = () => {
         setFormValues((prevState) => ({
           ...prevState,
           siteName: c[0].siteName || prevState.siteName,
+          slug: c[0].slug || prevState.slug,
           metaTitle: c[0].metaTitle || prevState.metaTitle,
           metaDescription: c[0].metaDescription || prevState.metaDescription,
           articleContentFirst:
@@ -534,6 +636,7 @@ const Index = () => {
                         judete={judete}
                         localitati={localitati}
                         imaginiData={imaginiData}
+                        onRegenerateSlug={handleRegenerateSlug}
                       />
                     </div>
                   </div>
@@ -567,6 +670,9 @@ const Index = () => {
                         isNewImage={isNewImage}
                         imaginiData={imaginiData}
                         isLoadingImages={isLoadingImages}
+                        imgAlts={imgAlts}
+                        onAltChange={handleAltChange}
+                        altKeyFor={altKeyFor}
                       />
                     </div>
                   </div>

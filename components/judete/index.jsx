@@ -28,7 +28,12 @@ import { fetchFirme, transferaImagini } from "@/utils/localProjectlUtils";
 import { capitalizeFirstLetter } from "@/utils/strintText";
 import { filtrareOferte } from "@/utils/commonUtils";
 
-const index = async ({ data, judet, params, searchParams }) => {
+const index = async ({ data, judet, params, searchParams, h1Title }) => {
+  const pageH1 =
+    h1Title ||
+    `Firme de amenajari gradini si spatii verzi in ${capitalizeFirstLetter(
+      judet || ""
+    )}`;
   return (
     <>
       {/* <!-- Main Header Nav --> */}
@@ -64,10 +69,12 @@ const index = async ({ data, judet, params, searchParams }) => {
               <div className="home_content listing slider_style pt30">
                 <div className="home-text home6 text-center">
                   <BreadCrumb csName={"color-white"} />
-                  <h2 className="fz35 color-white">
+                  <h1 className="fz40 color-white">{pageH1}</h1>
+                  <p className="fz18 color-white">
                     Firme pregatite sa proiecteze, amenajeze si sa intretina
-                    spatiul tau verde în {capitalizeFirstLetter(judet)}
-                  </h2>
+                    spatiul tau verde din{" "}
+                    {capitalizeFirstLetter(judet || "")}.
+                  </p>
                 </div>
                 {/* End home-text */}
                 <ListSearchJudete

@@ -11,6 +11,9 @@ const GalerieFotoSection = ({
   isNewImage,
   imaginiData,
   isLoadingImages,
+  imgAlts = {},
+  onAltChange,
+  altKeyFor,
 }) => {
   return (
     <>
@@ -52,41 +55,70 @@ const GalerieFotoSection = ({
           </div>
           {/* End .col */}
           <div className="col-lg-12">
-            <ul className="mb-0">
+            <div className="row">
               {propertySelectedImgs?.length > 0
-                ? propertySelectedImgs?.map((item, index) => (
-                    <li key={index} className="list-inline-item">
-                      <div className="portfolio_item">
-                        <Image
-                          width={200}
-                          height={200}
-                          className="img-fluid cover"
-                          src={
-                            item instanceof File
-                              ? URL.createObjectURL(item)
-                              : item.finalUri
-                          }
-                          alt="fp1.jpg"
-                        />
+                ? propertySelectedImgs?.map((item, index) => {
+                    const altKey = altKeyFor
+                      ? altKeyFor(item)
+                      : item instanceof File
+                      ? item.name
+                      : item.fileName || item.finalUri;
+                    const altValue =
+                      imgAlts[altKey] !== undefined
+                        ? imgAlts[altKey]
+                        : !(item instanceof File) && item.alt
+                        ? item.alt
+                        : "";
+                    const displayAlt =
+                      altValue || "imagine firma (completeaza alt text)";
+                    return (
+                      <div
+                        key={index}
+                        className="col-md-4 col-lg-3 mb20"
+                      >
+                        <div className="portfolio_item mb10">
+                          <Image
+                            width={200}
+                            height={200}
+                            className="img-fluid cover"
+                            src={
+                              item instanceof File
+                                ? URL.createObjectURL(item)
+                                : item.finalUri
+                            }
+                            alt={displayAlt}
+                          />
 
-                        <div
-                          className="edu_stats_list"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="top"
-                          title="Delete"
-                          data-original-title="Delete"
-                        >
-                          <a onClick={() => deleteImage(item)}>
-                            <span className="flaticon-garbage"></span>
-                          </a>
+                          <div
+                            className="edu_stats_list"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            title="Delete"
+                            data-original-title="Delete"
+                          >
+                            <a onClick={() => deleteImage(item)}>
+                              <span className="flaticon-garbage"></span>
+                            </a>
+                          </div>
                         </div>
+                        <label className="small mb0">
+                          Alt text (SEO)
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          placeholder="Ex: Amenajare gradina Cluj - Firma XYZ"
+                          value={altValue}
+                          maxLength={125}
+                          onChange={(e) =>
+                            onAltChange && onAltChange(altKey, e.target.value)
+                          }
+                        />
                       </div>
-                    </li>
-                  ))
+                    );
+                  })
                 : undefined}
-
-              {/* End li */}
-            </ul>
+            </div>
           </div>
           {/* End .col */}
 

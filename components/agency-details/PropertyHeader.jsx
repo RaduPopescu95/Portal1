@@ -11,11 +11,18 @@ const PropertyHeader = ({ firma }) => {
             height={100}
             className="logo1 img-fluid"
             src={firma?.logo?.finalUri}
-            alt="Logo"
-            layout="intrinsic"
+            alt={`${firma?.siteName || "Firma"} logo`}
+            priority
           />
           <div className="d-flex flex-column justify-content-center align-items-center">
-            <h3 className="m-0 fw-bold fz20">{firma?.siteName}</h3>
+            <h1 className="m-0 fw-bold fz20">{firma?.siteName}</h1>
+            {(firma?.categorie || firma?.localitate) && (
+              <p className="m-0 fz14 txt-color-third">
+                {firma?.categorie}
+                {firma?.categorie && firma?.localitate ? " in " : ""}
+                {firma?.localitate}
+              </p>
+            )}
           </div>
         </div>
       </div>

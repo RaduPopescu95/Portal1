@@ -113,11 +113,20 @@ export const uploadMultipleImages = async (
   images, // Acesta va fi acum un array de imagini
   newImage,
   firstLocation,
-  deletedImages
+  deletedImages,
+  alts // optional: map keyed by File.name or existing fileName -> alt text
 ) => {
   const authInstance = authentication;
   const currentUser = authInstance.currentUser;
   let imgs = [];
+
+  const getAltFor = (key) => {
+    if (!alts) return "";
+    if (typeof alts === "object" && !Array.isArray(alts)) {
+      return alts[key] || "";
+    }
+    return "";
+  };
 
   try {
     if (!images.length) {
@@ -166,11 +175,20 @@ export const uploadMultipleImages = async (
         const finalUri = await getDownloadURL(snapshot.ref);
         console.log("Image uploaded successfully. Download URL:", finalUri);
 
-        imgs.push({ finalUri, fileName });
+        const alt = getAltFor(imageUpload.name) || "";
+        imgs.push({ finalUri, fileName, alt });
       } else {
+        const existingKey =
+          imageUpload.fileName || imageUpload.finalUri || "";
+        const alt =
+          getAltFor(existingKey) ||
+          getAltFor(imageUpload.finalUri) ||
+          imageUpload.alt ||
+          "";
         imgs.push({
           finalUri: imageUpload.finalUri,
           fileName: imageUpload.fileName,
+          alt,
         });
       }
     }

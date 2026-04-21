@@ -1,54 +1,47 @@
-import { toUrlSlug } from "@/utils/commonUtils";
 import {
   handleGetFirestore,
-  handleQueryFirestore,
 } from "@/utils/firestoreUtils";
 import { transferaImagini } from "@/utils/localProjectlUtils";
 import { replaceSpacesWithDashes } from "@/utils/strintText";
 import { parseDateToISO } from "@/utils/timeUtils";
+import { slugifyFirma } from "@/utils/slugify";
 
 export const revalidate = 3600;
-const URL = `https://firmeamenajarigradina.ro`;
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
 
 export default async function sitemap() {
-  console.log("Fetching 'Judete' data from Firestore...");
   const judeteData = await handleGetFirestore("Judete");
-  console.log("Judete Data:", judeteData);
 
-  console.log("Fetching 'Parteneri' from Firestore...");
   const parteners = await handleGetFirestore("Firme");
-  let parteneri = await transferaImagini(parteners);
-  console.log("Parteneri Data:", parteneri);
+  const parteneri = await transferaImagini(parteners);
+
+  const articole = await handleGetFirestore("Articole");
 
   const seenUrls = new Set();
 
-  console.log("Processing 'localitatiCategorii'...");
   const localitatiCategorii = parteneri.reduce((acc, partener) => {
     if (partener.categorie && partener.localitate) {
-      const url = `${URL}/${replaceSpacesWithDashes(
+      const url = `${SITE_URL}/${replaceSpacesWithDashes(
         partener.categorie.toLowerCase()
       )}-${replaceSpacesWithDashes(partener.localitate.toLowerCase())}`;
       if (!seenUrls.has(url)) {
         seenUrls.add(url);
         acc.push({
-          url: url,
-          lastModified: parseDateToISO(partener.firstUploadDate),
+          url,
+          lastModified:
+            parseDateToISO(partener.firstUploadDate) ||
+            new Date().toISOString(),
         });
-        console.log(`Added localicateCategorie URL: ${url}`);
       }
     }
     return acc;
   }, []);
-  console.log(
-    "Finished processing 'localitatiCategorii'.",
-    localitatiCategorii
-  );
 
-  console.log("Processing 'localitati'...");
   const localitati = parteneri.reduce((acc, partener) => {
-    console.log("partener...sitemap", partener); // pentru verificare
-    if (partener.judet) {
-      const url = `${URL}/amenajari-gradini-${replaceSpacesWithDashes(
+    if (partener.judet && partener.localitate) {
+      const url = `${SITE_URL}/amenajari-gradini-${replaceSpacesWithDashes(
         partener.localitate.toLowerCase()
       )}`;
       if (!seenUrls.has(url)) {
@@ -63,52 +56,76 @@ export default async function sitemap() {
             : null;
 
         const sitemapEntry = {
-          url: url,
-          lastModified: parseDateToISO(partener.firstUploadDate),
+          url,
+          lastModified:
+            parseDateToISO(partener.firstUploadDate) ||
+            new Date().toISOString(),
         };
 
         if (imageUrl) {
-          console.log("has image url....");
-          sitemapEntry.image = {
-            url: imageUrl,
-          };
-        } else {
-          console.log("does not have image url....");
+          sitemapEntry.image = { url: imageUrl };
         }
 
         acc.push(sitemapEntry);
-        console.log(`Added localitate URL: ${url}`);
-        if (imageUrl) {
-          console.log(`With image: ${imageUrl}`);
-        }
       }
     }
     return acc;
   }, []);
 
-  console.log("Finished processing 'localitati'.", localitati);
-
-  console.log("Processing 'judete'...");
   const judete = parteneri.reduce((acc, partener) => {
-    if (partener.categorie && partener.localitate) {
-      const url = `${URL}/${replaceSpacesWithDashes(
+    if (partener.judet) {
+      const url = `${SITE_URL}/judet/${replaceSpacesWithDashes(
         partener.judet.toLowerCase()
       )}`;
       if (!seenUrls.has(url)) {
         seenUrls.add(url);
         acc.push({
-          url: url,
-          lastModified: parseDateToISO(partener.firstUploadDate),
+          url,
+          lastModified:
+            parseDateToISO(partener.firstUploadDate) ||
+            new Date().toISOString(),
         });
-        console.log(`Added localicateCategorie URL: ${url}`);
       }
     }
     return acc;
   }, []);
-  console.log("Finished processing 'judete'.", judete);
 
-  console.log("Generating static routes...");
-  const routes = [
+  const firmeDetail = parteneri.reduce((acc, partener) => {
+    const slug = partener.slug || slugifyFirma(partener);
+    if (!slug) return acc;
+    const url = `${SITE_URL}/firma/${slug}`;
+    if (!seenUrls.has(url)) {
+      seenUrls.add(url);
+      const imageUrl = partener?.imagini?.imgs?.[0]?.finalUri || null;
+      const entry = {
+        url,
+        lastModified:
+          parseDateToISO(partener.lastUpdateDate) ||
+          parseDateToISO(partener.firstUploadDate) ||
+          new Date().toISOString(),
+      };
+      if (imageUrl) entry.image = { url: imageUrl };
+      acc.push(entry);
+    }
+    return acc;
+  }, []);
+
+  const blogRoutes = (articole || []).reduce((acc, a) => {
+    const slugOrId = a.slug || a.id;
+    if (!slugOrId) return acc;
+    const url = `${SITE_URL}/blog/${slugOrId}`;
+    if (!seenUrls.has(url)) {
+      seenUrls.add(url);
+      acc.push({
+        url,
+        lastModified:
+          parseDateToISO(a.firstUploadDate) || new Date().toISOString(),
+      });
+    }
+    return acc;
+  }, []);
+
+  const staticRoutes = [
     "/",
     "/despre-noi",
     "/cum-functioneaza",
@@ -118,18 +135,18 @@ export default async function sitemap() {
     "/amenajari-gradini",
     "/blog",
     "/contact",
+    "/inscrie-firma",
   ].map((route) => ({
-    url: `${URL}${route}`,
-    lastModified: "2024-09-26T00:00:00.000Z",
+    url: `${SITE_URL}${route}`,
+    lastModified: new Date().toISOString(),
   }));
-  console.log("Static routes:", routes);
 
-  const fullSitemap = [
-    ...routes,
+  return [
+    ...staticRoutes,
     ...judete,
     ...localitatiCategorii,
     ...localitati,
+    ...firmeDetail,
+    ...blogRoutes,
   ];
-  console.log("Full Sitemap Generated:", fullSitemap);
-  return fullSitemap;
 }

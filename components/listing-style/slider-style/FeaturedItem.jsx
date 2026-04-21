@@ -12,22 +12,23 @@ import {
 } from "@/utils/firestoreUtils";
 import { calculateDistance } from "@/utils/commonUtils";
 import PromotionSection from "./PromotionSection";
+import { slugifyFirma } from "@/utils/slugify";
 
-const FeaturedItem = ({ firme, params, searchParams }) => {
+const FeaturedItem = ({ firme, params, searchParams, renderMode }) => {
   let content;
-  if (params && firme.length === 0) {
+  const mode = renderMode || (params ? "detail" : "home");
+
+  if (mode === "detail" && firme.length === 0) {
     return <PromotionSection params={params} />;
   }
 
-  if (params) {
+  if (mode === "detail") {
     content = firme.slice(0, 1).map((item) => <AgencyDetails firma={item} />);
   } else {
-    content = firme.map((item) => (
-      <div className={`${"col-md-3 col-lg-3"} `} key={item.id}>
+    content = firme.map((item, idx) => (
+      <div className={`${"col-md-3 col-lg-3"} `} key={item.id || item.documentId}>
         <Link
-          href={`/${replaceSpacesWithDashes(
-            item?.categorie.toLowerCase()
-          )}-${replaceSpacesWithDashes(item?.localitate.toLowerCase())}`}
+          href={`/firma/${item?.slug || slugifyFirma(item)}`}
         >
           <div className={`feat_property home7 style4 ${undefined}`}>
             <div className="thumb">
@@ -36,7 +37,14 @@ const FeaturedItem = ({ firme, params, searchParams }) => {
                 height={220}
                 className="img-whp w-100 h-100 cover"
                 src={item?.imagini?.imgs[0]?.finalUri}
-                alt="fp1.jpg"
+                alt={
+                  item?.imagini?.imgs?.[0]?.alt ||
+                  [item?.siteName, item?.categorie, item?.localitate]
+                    .filter(Boolean)
+                    .join(" - ") ||
+                  "Firma amenajari gradini"
+                }
+                priority={idx < 2}
               />
               <div className="thmb_cntnt">
                 <ul className="tag mb0">

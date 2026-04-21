@@ -1,31 +1,42 @@
-import dynamic from "next/dynamic";
 import InscrieClinica from "@/components/inscrie-firma";
+import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
 
 export const metadata = {
-  title: "înscrie firmă",
-  description: "înscrie firmă",
+  title: "Inscrie-ti firma in director",
+  description:
+    "Inscrie-ti firma de amenajari gradini in cel mai mare director din Romania si atrage clienti locali.",
+  openGraph: {
+    title: "Inscrie-ti firma in director",
+    description:
+      "Inscrie-ti firma de amenajari gradini in cel mai mare director din Romania si atrage clienti locali.",
+    url: "/inscrie-firma",
+  },
+  alternates: {
+    canonical: "/inscrie-firma",
+  },
 };
 
 const index = () => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: `Amenajari Gradini – Amenajari Spatii Verzi – Peisagisti`,
-    // image: product.image,
+    name: "Inscrie-ti firma in director",
     description:
-      "Cauti o firma de amenajari gradini care sa amenajeze spatiu tau residential sau sediul companiei tale? Vezi specialistii in amenajari spatii verzi de pe portal.",
+      "Inscrie-ti firma de amenajari gradini in cel mai mare director din Romania si atrage clienti locali.",
   };
 
   return (
     <>
-      {/* Add JSON-LD to your page */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <JsonLd data={jsonLd} />
+      <BreadcrumbsJsonLd
+        items={[
+          { name: "Acasa", path: "/" },
+          { name: "Inscrie firma", path: "/inscrie-firma" },
+        ]}
       />
       <InscrieClinica />
     </>
   );
 };
 
-export default dynamic(() => Promise.resolve(index), { ssr: false });
+export default index;

@@ -1,27 +1,27 @@
-import dynamic from "next/dynamic";
 import SliderStyle from "@/components/listing-style/slider-style";
 import { handleGetFirestore } from "@/utils/firestoreUtils";
 
 import { fetchFirme, transferaImagini } from "@/utils/localProjectlUtils";
 import { cache } from "react";
 import { filtrareOferte } from "@/utils/commonUtils";
+import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
+import { buildItemListLd } from "@/utils/schemaOrg";
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
 
 export const metadata = {
   title: "Firme de proiectare, amenajare si intretinere spatii verzi",
   description:
-    "Cauti un partener de incredere pentru gradina ta rezidentiala sau comerciala? Vezi firmele de pe portalul nostrum!",
+    "Cauti un partener de incredere pentru gradina ta rezidentiala sau comerciala? Vezi firmele de amenajari spatii verzi din toata Romania.",
   openGraph: {
     title: "Firme de proiectare, amenajare si intretinere spatii verzi",
     description:
-      "Cauti un partener de incredere pentru gradina ta rezidentiala sau comerciala? Vezi firmele de pe portalul nostrum!",
+      "Cauti un partener de incredere pentru gradina ta rezidentiala sau comerciala? Vezi firmele de amenajari spatii verzi din toata Romania.",
+    url: "/amenajari-gradini",
   },
   alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/amenajari-gradini`,
-  },
-  manifest: `${process.env.NEXT_PUBLIC_SITE_URL}/manifest.json`,
-  robots: {
-    index: true,
-    follow: true,
+    canonical: "/amenajari-gradini",
   },
 };
 
@@ -66,22 +66,28 @@ export async function getServerData(params, searchParams) {
 }
 
 const index = async ({ params, searchParams }) => {
-  const jsonLd = {
+  const data = await getServerData(params, searchParams.slug);
+
+  const webPageLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "Firma Amenajari Spatii Verzi",
-    // image: product.image,
+    name: "Firme de proiectare, amenajare si intretinere spatii verzi",
     description:
-      "Cauta un furnizor de servicii de amenajari spatii verzi in apropiere si solicita o oferta personalizata.",
+      "Cauti un partener de incredere pentru gradina ta rezidentiala sau comerciala? Vezi firmele de amenajari spatii verzi din toata Romania.",
+    url: `${SITE_URL}/amenajari-gradini`,
   };
-  console.log("searchParams...", searchParams);
-  const data = await getServerData(params, searchParams.slug);
+
+  const itemListLd = buildItemListLd(data.firme, SITE_URL);
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <JsonLd data={webPageLd} />
+      <JsonLd data={itemListLd} />
+      <BreadcrumbsJsonLd
+        items={[
+          { name: "Acasa", path: "/" },
+          { name: "Amenajari gradini", path: "/amenajari-gradini" },
+        ]}
       />
 
       <SliderStyle
@@ -90,9 +96,10 @@ const index = async ({ params, searchParams }) => {
         categorii={data.categorii}
         firme={data.firme}
         searchParams={searchParams.slug}
+        h1Title="Firme de proiectare, amenajare si intretinere spatii verzi in Romania"
       />
     </>
   );
 };
 
-export default dynamic(() => Promise.resolve(index), { ssr: false });
+export default index;

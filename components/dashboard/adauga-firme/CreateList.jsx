@@ -1,4 +1,11 @@
 import ArticleEditor from "./QuillForm";
+import {
+  META_TITLE_MIN,
+  META_TITLE_MAX,
+  META_DESCRIPTION_MIN,
+  META_DESCRIPTION_MAX,
+  getCounterClass,
+} from "@/utils/seoValidation";
 
 const CreateList = ({
   handleInputChange,
@@ -8,7 +15,11 @@ const CreateList = ({
   handleJudetChange,
   localitati,
   imaginiData,
+  onRegenerateSlug,
 }) => {
+  const metaTitleLen = (formValues.metaTitle || "").length;
+  const metaDescLen = (formValues.metaDescription || "").length;
+
   return (
     <>
       <div className="col-lg-6 col-xl-6">
@@ -101,7 +112,41 @@ const CreateList = ({
       </div>
       <div className="col-lg-12">
         <div className="my_profile_setting_input form-group">
-          <label htmlFor="metaTitle">Meta Title</label>
+          <label htmlFor="slug">
+            Slug (URL firma) <span className="text-danger">*</span>
+          </label>
+          <div className="d-flex" style={{ gap: 8 }}>
+            <input
+              type="text"
+              className="form-control"
+              id="slug"
+              name="slug"
+              value={formValues.slug || ""}
+              onChange={handleInputChange}
+              placeholder="ex: firma-abc-cluj"
+              required
+            />
+            {onRegenerateSlug && (
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                onClick={onRegenerateSlug}
+              >
+                Regenereaza
+              </button>
+            )}
+          </div>
+          <small className="text-muted">
+            URL public: firmeamenajarigradina.ro/firma/
+            {formValues.slug || "(slug)"}
+          </small>
+        </div>
+      </div>
+      <div className="col-lg-12">
+        <div className="my_profile_setting_input form-group">
+          <label htmlFor="metaTitle">
+            Meta Title <span className="text-danger">*</span>
+          </label>
           <input
             type="text"
             className="form-control"
@@ -109,12 +154,26 @@ const CreateList = ({
             name="metaTitle"
             value={formValues.metaTitle}
             onChange={handleInputChange}
+            required
+            minLength={META_TITLE_MIN}
+            maxLength={META_TITLE_MAX}
           />
+          <small
+            className={getCounterClass(
+              metaTitleLen,
+              META_TITLE_MIN,
+              META_TITLE_MAX
+            )}
+          >
+            {metaTitleLen}/{META_TITLE_MIN}-{META_TITLE_MAX} caractere
+          </small>
         </div>
       </div>
       <div className="col-lg-12">
         <div className="my_profile_setting_textarea">
-          <label htmlFor="metaDescription">Meta Description</label>
+          <label htmlFor="metaDescription">
+            Meta Description <span className="text-danger">*</span>
+          </label>
           <textarea
             className="form-control"
             id="metaDescription"
@@ -122,7 +181,20 @@ const CreateList = ({
             rows="7"
             value={formValues.metaDescription}
             onChange={handleInputChange}
+            required
+            minLength={META_DESCRIPTION_MIN}
+            maxLength={META_DESCRIPTION_MAX}
           ></textarea>
+          <small
+            className={getCounterClass(
+              metaDescLen,
+              META_DESCRIPTION_MIN,
+              META_DESCRIPTION_MAX
+            )}
+          >
+            {metaDescLen}/{META_DESCRIPTION_MIN}-{META_DESCRIPTION_MAX}{" "}
+            caractere
+          </small>
         </div>
       </div>
     </>

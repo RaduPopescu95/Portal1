@@ -1,33 +1,43 @@
-import dynamic from "next/dynamic";
 import AboutUs from "@/components/about-us";
+import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
 
 export const metadata = {
-  title: "Cum-functioneaza",
-  description: "Cum-functioneaza",
+  title: "Cum functioneaza portalul",
+  description:
+    "Afla cum gasesti rapid o firma de amenajari gradini pe FirmeAmenajariGradina.ro si cum soliciti o oferta personalizata.",
+  openGraph: {
+    title: "Cum functioneaza portalul",
+    description:
+      "Afla cum gasesti rapid o firma de amenajari gradini pe FirmeAmenajariGradina.ro si cum soliciti o oferta personalizata.",
+    url: "/cum-functioneaza",
+  },
+  alternates: {
+    canonical: "/cum-functioneaza",
+  },
 };
 
 const index = () => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: `Amenajari Gradini – Amenajari Spatii Verzi – Peisagisti`,
-    // image: product.image,
+    name: "Cum functioneaza portalul",
     description:
-      "Cauti o firma de amenajari gradini care sa amenajeze spatiu tau residential sau sediul companiei tale? Vezi specialistii in amenajari spatii verzi de pe portal.",
+      "Afla cum gasesti rapid o firma de amenajari gradini pe FirmeAmenajariGradina.ro si cum soliciti o oferta personalizata.",
   };
 
   return (
     <>
-      {/* Add JSON-LD to your page */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <JsonLd data={jsonLd} />
+      <BreadcrumbsJsonLd
+        items={[
+          { name: "Acasa", path: "/" },
+          { name: "Cum functioneaza", path: "/cum-functioneaza" },
+        ]}
       />
-      {/* ... */}
 
       <AboutUs />
     </>
   );
 };
 
-export default dynamic(() => Promise.resolve(index), { ssr: false });
+export default index;

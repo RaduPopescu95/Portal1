@@ -1,9 +1,12 @@
-import dynamic from "next/dynamic";
 import NotFound from "@/components/404";
 
 export const metadata = {
-  title: "404 Not Found",
-  description: "404 Not Found",
+  title: "Pagina nu a fost gasita",
+  description: "Pagina cautata nu exista pe FirmeAmenajariGradina.ro.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 const index = () => {
@@ -14,4 +17,4 @@ const index = () => {
   );
 };
 
-export default dynamic(() => Promise.resolve(index), { ssr: false });
+export default index;

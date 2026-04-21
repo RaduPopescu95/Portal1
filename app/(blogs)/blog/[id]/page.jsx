@@ -1,5 +1,3 @@
-import dynamic from "next/dynamic";
-
 import BreadCrumb2 from "@/components/blog-details/BreadCrumb2";
 import Comments from "@/components/blog-details/Comments";
 import Pagination from "@/components/blog-details/Pagination";
@@ -20,25 +18,43 @@ import {
   handleGetFirestore,
   handleQueryFirestore,
 } from "@/utils/firestoreUtils";
+import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
+import { buildArticleLd } from "@/utils/schemaOrg";
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
 
 export const revalidate = 60; // revalidate at most every minute , hour at 3600
 
-export async function generateMetadata({ params, searchParams }, parent) {
-  // read route params
-  const id = Number(params.id);
-  if (id === "favicon.ico") {
-    return null; // Returnează null sau orice alt component care indică că pagina nu trebuie să proceseze acest id.
+export async function generateMetadata({ params }) {
+  if (params.id === "favicon.ico") {
+    return null;
   }
-  console.log("id is here...", id);
+  const parts = params.id.split("-");
+  const id = Number(parts[0]);
   const blogArr = await handleQueryFirestore("Articole", "id", id);
+  const blog = blogArr?.[0];
+
+  const title = blog?.metaTitle || blog?.siteName || "Articol blog";
+  const description =
+    blog?.metaDescription ||
+    "Articole si ghiduri despre amenajari gradini si spatii verzi.";
+  const imageUrl = blog?.image?.finalUri;
 
   return {
-    title: `${blogArr[0].metaTitle}`,
-    description: `${blogArr[0].metaDescription}`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      url: `/blog/${params.id}`,
+      images: imageUrl ? [{ url: imageUrl }] : undefined,
+    },
+    alternates: {
+      canonical: `/blog/${params.id}`,
+    },
   };
-
-  // optionally access and extend (rather than replace) parent metadata
-  // const previousImages = (await parent).openGraph?.images || [];
 }
 
 const BlogDetailsDynamic = async ({ params }) => {
@@ -51,23 +67,21 @@ const BlogDetailsDynamic = async ({ params }) => {
   const blogArr = await handleQueryFirestore("Articole", "id", id);
   const articole = await handleGetFirestore("Articole");
   const blog = blogArr[0];
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    name: blog?.metaTitle,
-    // image: product.image,
-    description: blog?.metaDescription,
-  };
-  console.log("blog is here...", blog);
+  const articleLd = buildArticleLd(blog, SITE_URL, `/blog/${params.id}`);
 
   return (
     <>
-      {/* Add JSON-LD to your page */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <JsonLd data={articleLd} />
+      <BreadcrumbsJsonLd
+        items={[
+          { name: "Acasa", path: "/" },
+          { name: "Blog", path: "/blog" },
+          {
+            name: blog?.siteName || "Articol",
+            path: `/blog/${params.id}`,
+          },
+        ]}
       />
-      {/* ... */}
 
       {/* <!-- Main Header Nav --> */}
       <Header />
@@ -136,7 +150,8 @@ const BlogDetailsDynamic = async ({ params }) => {
                       height={414}
                       className="w-100 h-100 cover"
                       src={blog?.image?.finalUri}
-                      alt={blog?.image?.finalUri}
+                      alt={blog?.siteName || "Articol blog"}
+                      priority
                     />
                   </div>
 
@@ -256,6 +271,4 @@ const BlogDetailsDynamic = async ({ params }) => {
   );
 };
 
-export default dynamic(() => Promise.resolve(BlogDetailsDynamic), {
-  ssr: false,
-});
+export default BlogDetailsDynamic;

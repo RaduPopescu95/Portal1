@@ -3,44 +3,46 @@ import HomeMain from "./(homes)/home-page/page";
 import { handleGetFirestore } from "@/utils/firestoreUtils";
 import { fetchFirme } from "@/utils/localProjectlUtils";
 import { cache } from "react";
+import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
 
 export const metadata = {
-  title: "Amenajari Gradini – Amenajari Spatii Verzi – Peisagisti",
+  title: "Amenajari Gradini si Spatii Verzi – Peisagisti Romania",
   description:
-    "Cauti o firma de amenajari gradini care sa amenajeze spatiu tau residential sau sediul companiei tale? Vezi specialistii in amenajari spatii verzi de pe portal",
+    "Cauti o firma de amenajari gradini pentru casa ta sau pentru sediul companiei? Gaseste specialistii in amenajari spatii verzi din apropierea ta.",
   openGraph: {
-    title: "Amenajari Gradini – Amenajari Spatii Verzi – Peisagisti",
+    title: "Amenajari Gradini si Spatii Verzi – Peisagisti Romania",
     description:
-      "Cauti o firma de amenajari gradini care sa amenajeze spatiu tau residential sau sediul companiei tale? Vezi specialistii in amenajari spatii verzi de pe portal",
+      "Cauti o firma de amenajari gradini pentru casa ta sau pentru sediul companiei? Gaseste specialistii in amenajari spatii verzi din apropierea ta.",
+    url: "/",
   },
   alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_SITE_URL}/`,
-  },
-  manifest: `${process.env.NEXT_PUBLIC_SITE_URL}/manifest.json`,
-  robots: {
-    index: true,
-    follow: true,
+    canonical: "/",
   },
 };
 export const revalidate = 60; // revalidate at most every minute , hour at 3600
 
 export default async function Home() {
-  const jsonLd = {
+  const webPageLd = {
     "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: "Amenajari Gradini – Amenajari Spatii Verzi – Peisagisti",
-    // image: product.image,
+    "@type": "WebSite",
+    name: "FirmeAmenajariGradina.ro",
+    url: SITE_URL,
     description:
-      "Cauti o firma de amenajari gradini care sa amenajeze spatiu tau residential sau sediul companiei tale? Vezi specialistii in amenajari spatii verzi de pe portal",
+      "Director national cu firme de amenajari gradini, peisagisti si servicii de intretinere spatii verzi.",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${SITE_URL}/cauta?slug={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
   };
+
   return (
     <>
-      {/* Add JSON-LD to your page */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      {/* ... */}
+      <JsonLd data={webPageLd} />
+      <BreadcrumbsJsonLd items={[{ name: "Acasa", path: "/" }]} />
 
       <Wrapper>
         <HomeMain />

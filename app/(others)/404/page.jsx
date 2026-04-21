@@ -1,7 +1,6 @@
 
 
 
-import dynamic from "next/dynamic";
 import NotFound from "@/components/404";
 
 export const metadata = {
@@ -18,4 +17,4 @@ const index = () => {
   );
 };
 
-export default dynamic(() => Promise.resolve(index), { ssr: false });
+export default index;

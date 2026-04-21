@@ -12,6 +12,7 @@ import {
 import { fetchLocation } from "@/app/services/geocoding";
 import { calculateDistance } from "@/utils/commonUtils";
 import { replaceDashesWithSpaces } from "@/utils/strintText";
+import { slugifyFirma } from "@/utils/slugify";
 
 const FeaturedItem = ({ firme, params }) => {
   const isGridOrList = true;
@@ -270,7 +271,13 @@ const FeaturedItem = ({ firme, params }) => {
             height={220}
             className="img-whp w-100 h-100 cover"
             src={item?.imagini?.imgs[0]?.finalUri}
-            alt="fp1.jpg"
+            alt={
+              item?.imagini?.imgs?.[0]?.alt ||
+              [item?.siteName, item?.categorie, item?.localitate]
+                .filter(Boolean)
+                .join(" - ") ||
+              "Firma amenajari gradini"
+            }
           />
           <div className="thmb_cntnt">
             <ul className="tag mb0">
@@ -309,16 +316,11 @@ const FeaturedItem = ({ firme, params }) => {
           <div className="tc_content p10">
             {/* <p className="text-thm">{item?.type}</p> */}
             <h4>
-              <Link href={`/agentie/${item?.id}-${item?.siteName}`}>
+              <Link href={`/firma/${item?.slug || slugifyFirma(item)}`}>
                 {item?.siteName}
               </Link>
             </h4>
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              Blandit turpis cursus in hac. Risus ultricies tristique nulla
-              aliquet enim.
-            </p>
+            {item?.metaDescription && <p>{item.metaDescription}</p>}
 
             {/* <ul className="prop_details mb0">
                 {item?.itemDetails.map((val, i) => (
