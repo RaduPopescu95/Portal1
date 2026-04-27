@@ -130,6 +130,105 @@ export const company = defineType({
       rows: 3,
     }),
     defineField({
+      name: "structuredData",
+      title: "Date structurate SEO",
+      type: "object",
+      description:
+        "Campuri optionale folosite doar pentru JSON-LD cand exista date reale.",
+      fields: [
+        defineField({
+          name: "priceRange",
+          title: "Interval pret",
+          type: "string",
+          description: "Ex: $, $$, $$$ sau 'De la 100 lei'.",
+        }),
+        defineField({
+          name: "openingHours",
+          title: "Program de lucru",
+          type: "array",
+          of: [
+            {
+              type: "object",
+              fields: [
+                defineField({
+                  name: "dayOfWeek",
+                  title: "Zi",
+                  type: "string",
+                  options: {
+                    list: [
+                      { title: "Luni", value: "Monday" },
+                      { title: "Marti", value: "Tuesday" },
+                      { title: "Miercuri", value: "Wednesday" },
+                      { title: "Joi", value: "Thursday" },
+                      { title: "Vineri", value: "Friday" },
+                      { title: "Sambata", value: "Saturday" },
+                      { title: "Duminica", value: "Sunday" },
+                    ],
+                  },
+                  validation: (Rule) => Rule.required(),
+                }),
+                defineField({
+                  name: "opens",
+                  title: "Ora deschidere",
+                  type: "string",
+                  description: "Format 24h: HH:mm, ex: 09:00.",
+                  validation: (Rule) =>
+                    Rule.regex(/^([01]\d|2[0-3]):[0-5]\d$/, {
+                      name: "HH:mm",
+                    }),
+                }),
+                defineField({
+                  name: "closes",
+                  title: "Ora inchidere",
+                  type: "string",
+                  description: "Format 24h: HH:mm, ex: 18:00.",
+                  validation: (Rule) =>
+                    Rule.regex(/^([01]\d|2[0-3]):[0-5]\d$/, {
+                      name: "HH:mm",
+                    }),
+                }),
+              ],
+              preview: {
+                select: {
+                  day: "dayOfWeek",
+                  opens: "opens",
+                  closes: "closes",
+                },
+                prepare({ day, opens, closes }) {
+                  return {
+                    title: day,
+                    subtitle:
+                      opens && closes ? `${opens} - ${closes}` : "Incomplet",
+                  };
+                },
+              },
+            },
+          ],
+        }),
+        defineField({
+          name: "aggregateRating",
+          title: "Rating agregat",
+          type: "object",
+          description:
+            "Completeaza doar cand exista review-uri reale, verificabile.",
+          fields: [
+            defineField({
+              name: "ratingValue",
+              title: "Rating",
+              type: "number",
+              validation: (Rule) => Rule.min(1).max(5),
+            }),
+            defineField({
+              name: "reviewCount",
+              title: "Numar review-uri",
+              type: "number",
+              validation: (Rule) => Rule.integer().min(1),
+            }),
+          ],
+        }),
+      ],
+    }),
+    defineField({
       name: "seo",
       title: "SEO",
       type: "seo",
@@ -143,4 +242,3 @@ export const company = defineType({
     },
   },
 });
-

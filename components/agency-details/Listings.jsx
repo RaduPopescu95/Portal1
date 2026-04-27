@@ -19,14 +19,14 @@ const Listings = () => {
               <div className="thmb_cntnt">
                 <ul className="icon mb0">
                   <li className="list-inline-item">
-                    <a href="#">
+                    <span>
                       <span className="flaticon-transfer-1"></span>
-                    </a>
+                    </span>
                   </li>
                   <li className="list-inline-item">
-                    <a href="#">
+                    <span>
                       <span className="flaticon-heart"></span>
-                    </a>
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -39,7 +39,7 @@ const Listings = () => {
                   <ul className="tag mb-3">
                     {item.saleTag.map((val, i) => (
                       <li className="list-inline-item" key={i}>
-                        <a href="#">{val}</a>
+                        <span>{val}</span>
                       </li>
                     ))}
                   </ul>
@@ -53,12 +53,12 @@ const Listings = () => {
                   </Link>
                 </div>
                 <p className="text-thm">{item.type}</p>
-                <h4>
+                <h3>
                   {" "}
                   <Link href={`/listing-details-v1/${item.id}`}>
                     {item.title}
                   </Link>
-                </h4>
+                </h3>
                 <p>
                   <span className="flaticon-placeholder"></span>
                   {item.location}
@@ -67,9 +67,9 @@ const Listings = () => {
                 <ul className="prop_details mb0">
                   {item.itemDetails.map((val, i) => (
                     <li className="list-inline-item" key={i}>
-                      <a href="#">
+                      <span>
                         {val.name}: {val.number}
-                      </a>
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -79,17 +79,17 @@ const Listings = () => {
               <div className="fp_footer">
                 <ul className="fp_meta float-start mb0">
                   <li className="list-inline-item">
-                    <a href="#">
+                    <span>
                       <Image
                         width={40}
                         height={40}
                         src={item.posterAvatar}
                         alt="pposter1.png"
                       />
-                    </a>
+                    </span>
                   </li>
                   <li className="list-inline-item">
-                    <a href="#">{item.posterName}</a>
+                    <span>{item.posterName}</span>
                   </li>
                 </ul>
                 <div className="fp_pdate float-end">{item.postedYear}</div>

@@ -2,6 +2,8 @@ import SliderStyle from "@/components/listing-style/slider-style";
 import { notFound } from "next/navigation";
 import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
 import { buildLocalBusinessLd } from "@/utils/schemaOrg";
+import { canonicalUrl } from "@/utils/siteUrl";
+import { DEFAULT_OG_IMAGE } from "@/utils/seoDefaults";
 import {
   getCompanyBySlug,
   getCompanySlugs,
@@ -9,9 +11,6 @@ import {
   getCities,
   getServiceCategories,
 } from "@/lib/sanity/queries";
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
 
 export const revalidate = 60;
 
@@ -31,10 +30,11 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }) {
   const firma = await getFirmaBySlug(params.slug);
   const pagePath = `/firma/${params.slug}`;
+  const canonical = canonicalUrl(pagePath);
   if (!firma) {
     return {
       title: "Firma negasita",
-      alternates: { canonical: pagePath },
+      alternates: { canonical },
       robots: { index: false, follow: false },
     };
   }
@@ -51,10 +51,10 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title,
       description,
-      url: pagePath,
-      images: imageUrl ? [{ url: imageUrl }] : undefined,
+      url: canonical,
+      images: imageUrl ? [{ url: imageUrl }] : [DEFAULT_OG_IMAGE],
     },
-    alternates: { canonical: pagePath },
+    alternates: { canonical },
   };
 }
 
@@ -71,7 +71,7 @@ const Page = async ({ params }) => {
   ]);
 
   const pagePath = `/firma/${params.slug}`;
-  const localBusinessLd = buildLocalBusinessLd(firma, SITE_URL, pagePath);
+  const localBusinessLd = buildLocalBusinessLd(firma, null, pagePath);
 
   const breadcrumbs = [{ name: "Acasa", path: "/" }];
   if (firma?.judet) {

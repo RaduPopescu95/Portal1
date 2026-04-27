@@ -37,7 +37,7 @@ const index = async ({
   const pageH1 =
     h1Title ||
     "Firme de proiectare, amenajare si intretinere spatii verzi";
-  const mode = renderMode || (params ? "detail" : "home");
+  const mode = renderMode || (typeof params === "string" ? "detail" : "home");
   const hideHero = mode !== "home";
   // if (!data.firme) {
   //   notFound();
@@ -54,7 +54,7 @@ const index = async ({
       {/* <!-- Modal --> */}
       <PopupSignInUp />
 
-      {hideHero && <BreadCrumbBanner title={pageH1} />}
+      {hideHero && mode !== "detail" && <BreadCrumbBanner title={pageH1} />}
 
       {/* <!-- 6th Home Design --> */}
       {!hideHero && (

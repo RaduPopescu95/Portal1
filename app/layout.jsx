@@ -7,12 +7,13 @@ import "../public/assets/scss/index.scss";
 import { Nunito } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { getSiteSettings } from "@/lib/sanity/queries";
+import { canonicalUrl } from "@/utils/siteUrl";
+import { DEFAULT_OG_IMAGE } from "@/utils/seoDefaults";
+import JsonLd from "@/components/common/JsonLd";
+import { buildOrganizationLd } from "@/utils/schemaOrg";
 // import CookieBanner from "@/components/Cookies/CookieBanner";
 // import { AuthProvider } from "@/context/AuthContext";
 // import { LoadScript } from "@react-google-maps/api";
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
 
 const defaultMetadata = {
   title: {
@@ -35,25 +36,18 @@ const defaultMetadata = {
   creator: "FirmeAmenajariGradina.ro",
   publisher: "FirmeAmenajariGradina.ro",
   referrer: "origin-when-cross-origin",
-  metadataBase: new URL(SITE_URL),
-  alternates: { canonical: "/" },
+  metadataBase: new URL(canonicalUrl("/")),
+  alternates: { canonical: canonicalUrl("/") },
   openGraph: {
     type: "website",
     locale: "ro_RO",
-    url: "/",
+    url: canonicalUrl("/"),
     siteName: "FirmeAmenajariGradina.ro",
     title:
       "Firme Amenajari Gradini si Spatii Verzi | Peisagisti Romania",
     description:
       "Director national cu firme de amenajari gradini, peisagisti si servicii de intretinere spatii verzi.",
-    images: [
-      {
-        url: "/og-default.jpg",
-        width: 1200,
-        height: 630,
-        alt: "FirmeAmenajariGradina.ro",
-      },
-    ],
+    images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
@@ -61,7 +55,7 @@ const defaultMetadata = {
       "Firme Amenajari Gradini si Spatii Verzi | Peisagisti Romania",
     description:
       "Director national cu firme de amenajari gradini, peisagisti si servicii de intretinere spatii verzi.",
-    images: ["/og-default.jpg"],
+    images: [DEFAULT_OG_IMAGE.url],
   },
   // Icons: favicon is provided via app/favicon.ico (file-based convention).
   // apple-touch-icon is emitted as a manual <link> in <head> below because
@@ -127,6 +121,7 @@ const nunito = Nunito({
 
 export default function RootLayout({ children }) {
   const libraries = ["places"];
+  const organizationLd = buildOrganizationLd();
   return (
     <html lang="ro">
       <head>
@@ -150,6 +145,7 @@ export default function RootLayout({ children }) {
           libraries={libraries}
         > */}
         {/* <AuthProvider> */}
+        <JsonLd data={organizationLd} />
         {children}
         {/* </AuthProvider> */}
         {/* </LoadScript> */}

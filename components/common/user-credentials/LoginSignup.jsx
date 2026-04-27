@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 
 const LoginSignup = () => {
   return (
@@ -143,9 +142,12 @@ const LoginSignup = () => {
                       Remember me
                     </label>
 
-                    <a className="btn-fpswd float-end" href="#">
+                    <button
+                      type="button"
+                      className="btn-fpswd float-end border-0 bg-transparent p-0"
+                    >
                       Lost your password?
-                    </a>
+                    </button>
                   </div>
                   {/* End remember me checkbox */}
 
@@ -156,9 +158,14 @@ const LoginSignup = () => {
 
                   <p className="text-center">
                     Dont have an account?{" "}
-                    <a className="text-thm" href="#">
+                    <button
+                      type="button"
+                      className="text-thm border-0 bg-transparent p-0"
+                      data-bs-toggle="tab"
+                      data-bs-target="#profile"
+                    >
                       Register
-                    </a>
+                    </button>
                   </p>
                 </form>
               </div>
@@ -308,9 +315,14 @@ const LoginSignup = () => {
 
                   <p className="text-center">
                     Already have an account?{" "}
-                    <a className="text-thm" href="#">
+                    <button
+                      type="button"
+                      className="text-thm border-0 bg-transparent p-0"
+                      data-bs-toggle="tab"
+                      data-bs-target="#home"
+                    >
                       Log In
-                    </a>
+                    </button>
                   </p>
                 </form>
                 {/* End .form */}

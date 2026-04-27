@@ -1,8 +1,5 @@
 import { buildBreadcrumbListLd } from "@/utils/schemaOrg";
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
-
 export function JsonLd({ data }) {
   if (!data) return null;
   return (
@@ -14,7 +11,7 @@ export function JsonLd({ data }) {
 }
 
 export function BreadcrumbsJsonLd({ items }) {
-  const data = buildBreadcrumbListLd(items, SITE_URL);
+  const data = buildBreadcrumbListLd(items);
   return <JsonLd data={data} />;
 }
 

@@ -8,7 +8,7 @@ const SidebarListings = ({ firma }) => {
     <div className="sidebar_listing_grid1">
       <div className="sidebar_listing_list">
         <div className="sidebar_advanced_search_widget">
-          <h4 className="fz40 ml5">Contact</h4>
+          <h2 className="fz40 ml5">Contact</h2>
           <ContactWithAgent firma={firma} />
         </div>
       </div>

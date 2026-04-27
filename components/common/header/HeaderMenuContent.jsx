@@ -64,90 +64,6 @@ const HeaderMenuContent = ({ float = "" }) => {
       </li>
       {/* End .dropitem */}
 
-      {/* <li className="dropitem">
-        <a
-          href="listing-grid-v5"
-          className={
-            listing.some((parent) => {
-              return parent.items.some(
-                (page) =>
-                  page.routerPath?.split("/")[1] === pathname?.split("/")[1]
-              );
-            })
-              ? "ui-active"
-              : undefined
-          }
-        >
-          <span className="title">Statii ITP</span>
-        </a>
-
-      </li> */}
-      {/* End .dropitem */}
-
-      {/* <li className="dropitem">
-        <a
-          href="cauta-statii"
-          className={
-            property.some((parent) => {
-              return parent.items.some(
-                (page) =>
-                  page.routerPath?.split("/")[1] === pathname?.split("/")[1]
-                // page.routerPath?.split('/')[1] + "/[id]" === pathname?.split('/')[1]
-              );
-            })
-              ? "ui-active"
-              : undefined
-          }
-        >
-          <span className="title">Cauta statie ITP</span>{" "}
-        </a>
-      </li> */}
-      {/* End .dropitem */}
-      {/* 
-      <li className="dropitem">
-        <a
-          href="#"
-          className={
-            pages.some(
-              (page) =>
-                page.routerPath?.split("/")[1] === pathname?.split("/")[1]
-            )
-              ? "ui-active"
-              : undefined
-          }
-        >
-          <span className="title">Despre noi</span>
-          <span className="arrow"></span>
-        </a>
-
-        <ul className="sub-menu ">
-          {home.map((item) => (
-            <li key={item.id}>
-              <Link
-                href={item.routerPath}
-                className={
-                  pathname?.split("/")[1] === item.routerPath?.split("/")[1]
-                    ? "ui-active"
-                    : undefined
-                }
-              >
-                {item.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </li> */}
-      {/* End .dropitem */}
-
-      {/* <li className="last">
-        <Link
-          href="/blog"
-          className={pathname === "/blog" ? "ui-active" : undefined}
-        >
-          Blog
-        </Link>
-      </li> */}
-      {/* End .dropitem */}
       <li className="last">
         <Link
           href="/contact"
@@ -156,18 +72,6 @@ const HeaderMenuContent = ({ float = "" }) => {
           Contact
         </Link>
       </li>
-      {/* End .dropitem */}
-
-      {/* <li className={`list-inline-item list_s ${float}`}>
-        <a
-          href="#"
-          className="btn flaticon-user"
-          data-bs-toggle="modal"
-          data-bs-target=".bd-example-modal-lg"
-        >
-          <span className="dn-lg">Login/Register</span>
-        </a>
-      </li> */}
       {/* End .dropitem */}
 
       <li className={`list-inline-item add_listing ${float}`}>

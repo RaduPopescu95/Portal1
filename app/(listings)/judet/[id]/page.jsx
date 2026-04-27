@@ -8,12 +8,11 @@ import {
 import { notFound } from "next/navigation";
 import { filtrareOferte } from "@/utils/commonUtils";
 import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
-import { buildItemListLd } from "@/utils/schemaOrg";
+import { buildFaqPageLd, buildItemListLd } from "@/utils/schemaOrg";
+import { canonicalUrl } from "@/utils/siteUrl";
+import { DEFAULT_OG_IMAGE } from "@/utils/seoDefaults";
 
 export const revalidate = 60; // revalidate at most every minute , hour at 3600
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
 
 export async function generateStaticParams() {
   return await getCountySlugs();
@@ -26,16 +25,18 @@ export async function generateMetadata({ params }) {
   const description =
     county?.seo?.metaDescription ||
     `Firme serioase de amenajari gradini si spatii verzi din judetul ${judetParam}. Vezi peisagistii recomandati si cere oferta acum.`;
+  const canonical = canonicalUrl(county?.seo?.canonical || `/judet/${params.id}`);
   return {
     title: county?.seo?.metaTitle || title,
     description,
     openGraph: {
       title,
       description,
-      url: `${SITE_URL}/judet/${params.id}`,
+      url: canonical,
+      images: [DEFAULT_OG_IMAGE],
     },
     alternates: {
-      canonical: county?.seo?.canonical || `${SITE_URL}/judet/${params.id}`,
+      canonical,
     },
     robots: county?.seo?.noIndex ? { index: false, follow: false } : undefined,
   };
@@ -79,15 +80,17 @@ const index = async ({ params, searchParams }) => {
     "@type": "WebPage",
     name: `Specialisti in peisagistica si gradinarit ${judetParam}`,
     description: `Firme serioase de amenajari gradini si spatii verzi din judetul ${judetParam}.`,
-    url: `${SITE_URL}/judet/${params.id}`,
+    url: canonicalUrl(`/judet/${params.id}`),
   };
 
-  const itemListLd = buildItemListLd(data.firms, SITE_URL);
+  const itemListLd = buildItemListLd(data.firms);
+  const faqPageLd = buildFaqPageLd(data.county.faq, `/judet/${params.id}`);
 
   return (
     <>
       <JsonLd data={webPageLd} />
       <JsonLd data={itemListLd} />
+      <JsonLd data={faqPageLd} />
       <BreadcrumbsJsonLd
         items={[
           { name: "Acasa", path: "/" },

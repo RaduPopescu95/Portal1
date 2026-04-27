@@ -1,6 +1,8 @@
 import BlogV1 from "@/components/blog-list-1";
 import { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
 import { getArticles } from "@/lib/sanity/queries";
+import { canonicalUrl } from "@/utils/siteUrl";
+import { DEFAULT_OG_IMAGE } from "@/utils/seoDefaults";
 
 export const metadata = {
   title: "Blog amenajari gradini si spatii verzi",
@@ -10,10 +12,11 @@ export const metadata = {
     title: "Blog amenajari gradini si spatii verzi",
     description:
       "Articole, ghiduri si sfaturi pentru amenajarea si intretinerea gradinilor si spatiilor verzi.",
-    url: "/blog",
+    url: canonicalUrl("/blog"),
+    images: [DEFAULT_OG_IMAGE],
   },
   alternates: {
-    canonical: "/blog",
+    canonical: canonicalUrl("/blog"),
   },
 };
 

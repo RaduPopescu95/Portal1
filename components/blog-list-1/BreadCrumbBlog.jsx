@@ -4,7 +4,7 @@ const BreadCrumbBlog = () => {
   return (
     <div className="breadcrumb_content style2">
       <BreadCrumb title="Blog List 1" />
-      <h2 className="breadcrumb_title">Blog</h2>
+      <h1 className="breadcrumb_title">Blog</h1>
     </div>
   );
 };

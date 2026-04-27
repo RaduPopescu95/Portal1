@@ -1,6 +1,7 @@
 import { parseDateToISO } from "./timeUtils";
 import { replaceSpacesWithDashes } from "./strintText";
 import { slugifyFirma } from "./slugify";
+import { canonicalUrl } from "./siteUrl";
 
 function isNonEmpty(v) {
   if (v == null) return false;
@@ -18,18 +19,112 @@ function pick(obj) {
   return result;
 }
 
-function absoluteUrl(siteUrl, path) {
-  if (!path) return siteUrl;
-  if (path.startsWith("http")) return path;
-  return `${siteUrl.replace(/\/$/, "")}${path.startsWith("/") ? path : `/${path}`}`;
-}
-
 function slugify(str) {
   if (!str) return "";
   return replaceSpacesWithDashes(String(str)).toLowerCase();
 }
 
-export function buildLocalBusinessLd(firma, siteUrl, pagePath) {
+function buildPlace(name) {
+  if (!isNonEmpty(name)) return null;
+  return {
+    "@type": "Place",
+    name,
+  };
+}
+
+function buildFaqItems(faq) {
+  if (!Array.isArray(faq)) return [];
+  return faq
+    .filter((item) => isNonEmpty(item?.question) && isNonEmpty(item?.answer))
+    .map((item) => ({
+      "@type": "Question",
+      name: String(item.question).trim(),
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: String(item.answer).trim(),
+      },
+    }));
+}
+
+function validTime(value) {
+  return typeof value === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
+}
+
+function buildOpeningHoursSpecification(openingHours) {
+  if (!Array.isArray(openingHours)) return [];
+
+  return openingHours
+    .filter(
+      (item) =>
+        isNonEmpty(item?.dayOfWeek) &&
+        validTime(item?.opens) &&
+        validTime(item?.closes)
+    )
+    .map((item) => ({
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: item.dayOfWeek,
+      opens: item.opens,
+      closes: item.closes,
+    }));
+}
+
+function buildAggregateRating(rating) {
+  const ratingValue = Number(rating?.ratingValue);
+  const reviewCount = Number(rating?.reviewCount);
+
+  if (
+    Number.isNaN(ratingValue) ||
+    Number.isNaN(reviewCount) ||
+    ratingValue < 1 ||
+    ratingValue > 5 ||
+    reviewCount < 1
+  ) {
+    return null;
+  }
+
+  return {
+    "@type": "AggregateRating",
+    ratingValue,
+    reviewCount,
+  };
+}
+
+export function buildOrganizationLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "FirmeAmenajariGradina.ro",
+    url: canonicalUrl("/"),
+    logo: {
+      "@type": "ImageObject",
+      url: canonicalUrl("/android-chrome-512x512.png"),
+    },
+  };
+}
+
+export function buildFaqPageLd(faq, pagePath) {
+  const mainEntity = buildFaqItems(faq);
+  if (!mainEntity.length) return null;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    url: canonicalUrl(pagePath),
+    mainEntity,
+  };
+}
+
+export function buildWebPageLd({ name, description, path }) {
+  return pick({
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name,
+    description,
+    url: canonicalUrl(path),
+  });
+}
+
+export function buildLocalBusinessLd(firma, _siteUrl, pagePath) {
   if (!firma) return null;
 
   const telephones = [firma.telefonUnu, firma.telefonDoi].filter(isNonEmpty);
@@ -70,12 +165,39 @@ export function buildLocalBusinessLd(firma, siteUrl, pagePath) {
         }
       : null;
 
+  const areaServed = [buildPlace(firma.localitate), buildPlace(firma.judet)].filter(
+    Boolean
+  );
+
+  const makesOffer = firma.categorie
+    ? {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: firma.categorie,
+          serviceType: firma.categorie,
+        },
+      }
+    : null;
+
+  const hasMap = geo
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        `${geo.latitude},${geo.longitude}`
+      )}`
+    : null;
+  const openingHoursSpecification = buildOpeningHoursSpecification(
+    firma.structuredData?.openingHours
+  );
+  const aggregateRating = buildAggregateRating(
+    firma.structuredData?.aggregateRating
+  );
+
   return pick({
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: firma.siteName,
     description: firma.metaDescription,
-    url: absoluteUrl(siteUrl, pagePath),
+    url: canonicalUrl(pagePath),
     image: imageEntries.length ? imageEntries : undefined,
     logo: firma.logo?.finalUri,
     telephone: telephones.length
@@ -86,12 +208,20 @@ export function buildLocalBusinessLd(firma, siteUrl, pagePath) {
     email: firma.emailUnu,
     address: Object.keys(address).length > 1 ? address : undefined,
     geo: geo || undefined,
-    areaServed: firma.localitate,
+    hasMap: hasMap || undefined,
+    priceRange: firma.structuredData?.priceRange,
+    openingHoursSpecification: openingHoursSpecification.length
+      ? openingHoursSpecification
+      : undefined,
+    areaServed: areaServed.length ? areaServed : undefined,
+    serviceType: firma.categorie,
+    makesOffer: makesOffer || undefined,
     sameAs: sameAs.length ? sameAs : undefined,
+    aggregateRating: aggregateRating || undefined,
   });
 }
 
-export function buildItemListLd(firme, siteUrl) {
+export function buildItemListLd(firme, _siteUrl) {
   if (!Array.isArray(firme) || firme.length === 0) return null;
 
   const items = firme
@@ -102,7 +232,7 @@ export function buildItemListLd(firme, siteUrl) {
       return pick({
         "@type": "ListItem",
         position: i + 1,
-        url: absoluteUrl(siteUrl, path),
+        url: canonicalUrl(path),
         name: f.siteName,
       });
     })
@@ -117,7 +247,7 @@ export function buildItemListLd(firme, siteUrl) {
   };
 }
 
-export function buildBreadcrumbListLd(crumbs, siteUrl) {
+export function buildBreadcrumbListLd(crumbs, _siteUrl) {
   if (!Array.isArray(crumbs) || crumbs.length === 0) return null;
 
   return {
@@ -127,15 +257,15 @@ export function buildBreadcrumbListLd(crumbs, siteUrl) {
       "@type": "ListItem",
       position: i + 1,
       name: c.name,
-      item: absoluteUrl(siteUrl, c.path),
+      item: canonicalUrl(c.path),
     })),
   };
 }
 
-export function buildArticleLd(article, siteUrl, pagePath) {
+export function buildArticleLd(article, _siteUrl, pagePath) {
   if (!article) return null;
 
-  const url = absoluteUrl(siteUrl, pagePath);
+  const url = canonicalUrl(pagePath);
   const datePublished = parseDateToISO(article.firstUploadDate);
   const dateModified = parseDateToISO(
     article.lastUpdateDate || article.firstUploadDate
@@ -158,7 +288,7 @@ export function buildArticleLd(article, siteUrl, pagePath) {
       name: "FirmeAmenajariGradina.ro",
       logo: {
         "@type": "ImageObject",
-        url: absoluteUrl(siteUrl, "/android-chrome-512x512.png"),
+        url: canonicalUrl("/android-chrome-512x512.png"),
       },
     },
     mainEntityOfPage: {

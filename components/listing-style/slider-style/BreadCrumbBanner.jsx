@@ -4,9 +4,14 @@ import { usePathname } from "next/navigation";
 import BreadCrumb from "../../common/BreadCrumb";
 import { formatPathname } from "@/utils/commonUtils";
 
-const BreadCrumbBanner = () => {
+const BreadCrumbBanner = ({ title }) => {
   const pathname = usePathname();
   const formattedPathname = formatPathname(pathname);
+  const pageTitle =
+    title ||
+    (Array.isArray(formattedPathname)
+      ? formattedPathname.join(" > ")
+      : formattedPathname);
   return (
     <section className="inner_page_breadcrumb py-3">
       <div className="container">
@@ -22,11 +27,9 @@ const BreadCrumbBanner = () => {
                     : formattedPathname
                 }
               />
-              <h4 className="mt10 fz30 color-white text-upper-letters">
-                {Array.isArray(formattedPathname)
-                  ? formattedPathname.join(" > ")
-                  : formattedPathname}
-              </h4>
+              <h1 className="mt10 fz30 color-white text-upper-letters">
+                {pageTitle}
+              </h1>
             </div>
           </div>
           {/* End .col */}

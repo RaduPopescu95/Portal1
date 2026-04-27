@@ -14,9 +14,9 @@ const Creaator = () => {
         <h5 className="mt-0 mb0">Samul Williams</h5>
         <p className="mb0">(123)456-7890</p>
         <p className="mb0">info@email.com</p>
-        <a className="text-thm" href="#">
+        <span className="text-thm">
           View My Listing
-        </a>
+        </span>
       </div>
     </div>
   );

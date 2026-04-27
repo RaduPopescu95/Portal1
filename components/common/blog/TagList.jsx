@@ -10,7 +10,7 @@ const TagList = () => {
     <ul className="tag_list">
       {tagContent.map((item) => (
         <li className="list-inline-item" key={item.id}>
-          <a href="#">{item.name}</a>
+          <span>{item.name}</span>
         </li>
       ))}
     </ul>

@@ -10,11 +10,11 @@ const Categories = () => {
     <ul className="list_details">
       {categorieContent.map((item) => (
         <li key={item.id}>
-          <a href="#">
+          <span>
             <i className="fa fa-caret-right mr10"></i>
             {item.name}{" "}
             <span className="float-end">{item.propertyNumber} properties</span>
-          </a>
+          </span>
         </li>
       ))}
     </ul>

@@ -2,15 +2,14 @@ import SliderStyle from "@/components/listing-style/slider-style";
 import { filtrareOferte } from "@/utils/commonUtils";
 import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
 import { buildItemListLd } from "@/utils/schemaOrg";
+import { canonicalUrl } from "@/utils/siteUrl";
+import { DEFAULT_OG_IMAGE } from "@/utils/seoDefaults";
 import {
   getCounties,
   getCities,
   getPublishedCompanies,
   getServiceCategories,
 } from "@/lib/sanity/queries";
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
 
 export const metadata = {
   title: "Firme de proiectare, amenajare si intretinere spatii verzi",
@@ -20,10 +19,11 @@ export const metadata = {
     title: "Firme de proiectare, amenajare si intretinere spatii verzi",
     description:
       "Cauti un partener de incredere pentru gradina ta rezidentiala sau comerciala? Vezi firmele de amenajari spatii verzi din toata Romania.",
-    url: "/amenajari-gradini",
+    url: canonicalUrl("/amenajari-gradini"),
+    images: [DEFAULT_OG_IMAGE],
   },
   alternates: {
-    canonical: "/amenajari-gradini",
+    canonical: canonicalUrl("/amenajari-gradini"),
   },
 };
 
@@ -57,10 +57,10 @@ const index = async ({ params, searchParams }) => {
     name: "Firme de proiectare, amenajare si intretinere spatii verzi",
     description:
       "Cauti un partener de incredere pentru gradina ta rezidentiala sau comerciala? Vezi firmele de amenajari spatii verzi din toata Romania.",
-    url: `${SITE_URL}/amenajari-gradini`,
+    url: canonicalUrl("/amenajari-gradini"),
   };
 
-  const itemListLd = buildItemListLd(data.firme, SITE_URL);
+  const itemListLd = buildItemListLd(data.firme);
 
   return (
     <>
@@ -80,6 +80,7 @@ const index = async ({ params, searchParams }) => {
         localitati={data.localitati}
         firme={data.firme}
         searchParams={searchParams.slug}
+        renderMode="listing"
         h1Title="Firme de proiectare, amenajare si intretinere spatii verzi in Romania"
       />
     </>

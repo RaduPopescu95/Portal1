@@ -3,9 +3,9 @@ const Pagination = () => {
     <div className="row">
       <div className="col-sm-6 col-lg-6">
         <div className="pag_prev">
-          <a href="#">
+          <span aria-hidden="true">
             <span className="flaticon-back"></span>
-          </a>
+          </span>
           <div className="detls">
             <h5>Previous Post</h5> <p> Housing Markets That</p>
           </div>
@@ -15,9 +15,9 @@ const Pagination = () => {
 
       <div className="col-sm-6 col-lg-6">
         <div className="pag_next text-right">
-          <a href="#">
+          <span aria-hidden="true">
             <span className="flaticon-next"></span>
-          </a>
+          </span>
           <div className="detls">
             <h5>Next Post</h5> <p> Most This Decade</p>
           </div>

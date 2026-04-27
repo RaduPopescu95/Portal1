@@ -2,29 +2,29 @@ const Ratings = () => {
   return (
     <>
       <li className="list-inline-item">
-        <a href="#">
+        <span aria-hidden="true">
           <i className="fa fa-star"></i>
-        </a>
+        </span>
       </li>
       <li className="list-inline-item">
-        <a href="#">
+        <span aria-hidden="true">
           <i className="fa fa-star"></i>
-        </a>
+        </span>
       </li>
       <li className="list-inline-item">
-        <a href="#">
+        <span aria-hidden="true">
           <i className="fa fa-star"></i>
-        </a>
+        </span>
       </li>
       <li className="list-inline-item">
-        <a href="#">
+        <span aria-hidden="true">
           <i className="fa fa-star"></i>
-        </a>
+        </span>
       </li>
       <li className="list-inline-item">
-        <a href="#">
+        <span aria-hidden="true">
           <i className="fa fa-star-o"></i>
-        </a>
+        </span>
       </li>
     </>
   );

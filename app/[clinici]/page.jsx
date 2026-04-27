@@ -9,10 +9,9 @@ import {
 } from "@/lib/sanity/queries";
 import { notFound } from "next/navigation";
 import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
-import { buildItemListLd } from "@/utils/schemaOrg";
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
+import { buildFaqPageLd, buildItemListLd } from "@/utils/schemaOrg";
+import { canonicalUrl } from "@/utils/siteUrl";
+import { DEFAULT_OG_IMAGE } from "@/utils/seoDefaults";
 
 export const revalidate = 60;
 
@@ -27,6 +26,7 @@ export async function generateMetadata({ params }) {
     page?.seo?.metaDescription ||
     page?.intro ||
     "Firme locale de amenajari gradini si spatii verzi.";
+  const canonical = canonicalUrl(page?.seo?.canonical || `/${params.clinici}`);
 
   return {
     title,
@@ -34,10 +34,20 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title,
       description,
-      url: `/${params.clinici}`,
+      url: canonical,
+      images: page?.seo?.socialImage?.finalUri
+        ? [
+            {
+              url: page.seo.socialImage.finalUri,
+              width: page.seo.socialImage.width || 1200,
+              height: page.seo.socialImage.height || 630,
+              alt: page.seo.socialImage.alt || title,
+            },
+          ]
+        : [DEFAULT_OG_IMAGE],
     },
     alternates: {
-      canonical: page?.seo?.canonical || `/${params.clinici}`,
+      canonical,
     },
     robots: page?.seo?.noIndex ? { index: false, follow: false } : undefined,
   };
@@ -72,14 +82,15 @@ const index = async ({ params, searchParams = null }) => {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: h1Title,
-    url: `${SITE_URL}${pagePath}`,
+    url: canonicalUrl(pagePath),
     description:
       data.page?.seo?.metaDescription ||
       data.page?.intro ||
       "Lista firmelor locale listate pe FirmeAmenajariGradina.ro.",
   };
 
-  const itemListLd = buildItemListLd(data.firme, SITE_URL);
+  const itemListLd = buildItemListLd(data.firme);
+  const faqPageLd = buildFaqPageLd(data.page.faq, pagePath);
 
   const breadcrumbs = [{ name: "Acasa", path: "/" }];
   if (data.page?.county?.name) {
@@ -94,6 +105,7 @@ const index = async ({ params, searchParams = null }) => {
     <>
       <JsonLd data={webPageLd} />
       <JsonLd data={itemListLd} />
+      <JsonLd data={faqPageLd} />
       <BreadcrumbsJsonLd items={breadcrumbs} />
       <SliderStyle
         params={params.clinici}

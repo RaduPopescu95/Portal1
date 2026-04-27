@@ -36,26 +36,9 @@ const FirmaItem = ({ firme = [], params }) => {
           <div className="thmb_cntnt">
             <ul className="tag mb0">
               <li className="list-inline-item">
-                <a href="#">Promovat</a>
+                <span className="color-white fz14">Promovat</span>
               </li>
-              {/* <li className="list-inline-item">
-                  <a href="#" className="text-capitalize">
-                    {item?.featured}
-                  </a>
-                </li> */}
             </ul>
-            {/* <ul className="icon mb0">
-                <li className="list-inline-item">
-                  <a href="#">
-                    <span className="flaticon-transfer-1"></span>
-                  </a>
-                </li>
-                <li className="list-inline-item">
-                  <a href="#">
-                    <span className="flaticon-heart"></span>
-                  </a>
-                </li>
-              </ul> */}
 
             {/* <Link
                 href={`/agentie/${item?.id}`}
@@ -76,15 +59,6 @@ const FirmaItem = ({ firme = [], params }) => {
             </h3>
             {item?.metaDescription && <p>{item.metaDescription}</p>}
 
-            {/* <ul className="prop_details mb0">
-                {item?.itemDetails.map((val, i) => (
-                  <li className="list-inline-item" key={i}>
-                    <a href="#">
-                      {val.name}: {val.number}
-                    </a>
-                  </li>
-                ))}
-              </ul> */}
           </div>
           {/* End .tc_content */}
 

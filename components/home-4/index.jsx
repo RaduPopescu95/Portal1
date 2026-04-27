@@ -86,10 +86,10 @@ const index = async ({ firme, articole, categorii }) => {
                 <ul className="home4_iconbox mb0">
                   <LookingItem categorii={categorii} />
                 </ul>
-                <h3 className="fz18 txt-color-third w-75 mx-auto text-center mt10">
+                <p className="fz18 txt-color-third w-75 mx-auto text-center mt10">
                   <span className="flaticon-upload mr10" />
                   Vezi mai multe specializări
-                </h3>
+                </p>
               </div>
             </div>
           </div>

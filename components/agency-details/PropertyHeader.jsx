@@ -35,7 +35,7 @@ const PropertyHeader = ({ firma }) => {
         style={{ cursor: "pointer" }}
       >
         <div className="tc_content">
-          <h3>Fa-ti programare!</h3>
+          <p className="mb0 fw-bold fz20">Fa-ti programare!</p>
           <div className="d-flex justify-content-start align-items-center w-100">
             <span className="flaticon-smartphone-call"></span>
             <p className="m0">{firma?.telefonUnu}</p>
@@ -51,7 +51,7 @@ const PropertyHeader = ({ firma }) => {
         rel="noopener noreferrer"
       >
         <div className="tc_content">
-          <h3>Contactează-ne pe WhatsApp</h3>
+          <p className="mb0 fw-bold fz20">Contactează-ne pe WhatsApp</p>
         </div>
       </a>
 

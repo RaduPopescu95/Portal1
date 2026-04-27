@@ -25,9 +25,9 @@ const Blog = ({ articole = [] }) => {
 
           <div className="details">
             <div className="tc_content p10">
-              <h4 className="mb15">
+              <h3 className="mb15 fz20">
                 <Link href={`/blog/${item.slug}`}>{item.siteName}</Link>
-              </h4>
+              </h3>
               <p>{item?.metaDescription?.slice(0, 285)}</p>
             </div>
             {/* End .tc_content */}
@@ -35,10 +35,10 @@ const Blog = ({ articole = [] }) => {
             <div className="fp_footer p10">
               <ul className="fp_meta float-start mb0">
                 <li className="list-inline-item">
-                  <a href="#">
+                  <span>
                     <span className="flaticon-calendar pr10"></span>{" "}
                     {item.firstUploadDate}
-                  </a>
+                  </span>
                 </li>
               </ul>
               <Link className="fp_pdate float-end text-thm" href={`/blog/${item.slug}`}>

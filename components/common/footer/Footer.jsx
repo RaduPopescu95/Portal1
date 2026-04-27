@@ -132,30 +132,6 @@ const Footer = () => {
       </div>
       {/* End .col */}
 
-      {/* <div className="col-sm-6 col-md-6 col-lg-3 col-xl-3">
-        <div className="footer_contact_widget">
-          <h3>Contact Us</h3>
-          <ul className="list-unstyled">
-            <li>
-              <a href="mailto:info@email.com">info@email.com</a>
-            </li>
-            <li>
-              <a href="#">Collins Street West, Victoria</a>
-            </li>
-            <li>
-              <a href="#">8007, Australia.</a>
-            </li>
-            <li>
-              <a href="tel:+4733378901">+1 246-345-0699</a>
-            </li>
-            <li>
-              <a href="tel:+4733378901">+1 246-345-0695</a>
-            </li>
-          </ul>
-        </div>
-      </div> */}
-      {/* End .col */}
-
       {/* <div className="col-sm-12 col-md-12 col-lg-12 col-xl-12">
         <div className="footer_social_widget d-flex flex-column align-items-center text-center mt30">
           <ul className="mb30 list-unstyled">

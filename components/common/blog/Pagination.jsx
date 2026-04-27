@@ -5,17 +5,13 @@ import React from "react";
 const Pagination = ({
   currentPage = 1,
   totalPages = 3,
-  setCurrentPage = 1,
+  setCurrentPage = () => {},
 }) => {
-  const handleClick = (page, event) => {
-    event.preventDefault(); // prevenirea comportamentului default al link-ului
+  const handleClick = (page) => {
     setCurrentPage(page);
   };
 
-  const pageNumbers = [1, 2, 3];
-  for (let i = 1; i <= totalPages; i++) {
-    pageNumbers.push(i);
-  }
+  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
     <ul className="page_navigation">
@@ -34,13 +30,13 @@ const Pagination = ({
           key={number}
           className={`page-item ${number === currentPage ? "active" : ""}`}
         >
-          <a
+          <button
+            type="button"
             className="page-link"
-            href="#"
-            onClick={(e) => handleClick(number, e)}
+            onClick={() => handleClick(number)}
           >
             {number}
-          </a>
+          </button>
         </li>
       ))}
       <li

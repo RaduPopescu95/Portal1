@@ -34,14 +34,14 @@ const FeatureProperties = () => {
                   <ul className="tag mb0">
                     {item.saleTag.map((val, i) => (
                       <li className="list-inline-item" key={i}>
-                        <a href="#">{val}</a>
+                        <span>{val}</span>
                       </li>
                     ))}
                   </ul>
-                  <a className="fp_price" href="#">
+                  <span className="fp_price">
                     ${item.price}
                     <small>/mo</small>
-                  </a>
+                  </span>
                   <h4 className="posr color-white">{item.title}</h4>
                 </div>
               </div>

@@ -1,5 +1,4 @@
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
+import { canonicalUrl } from "@/utils/siteUrl";
 
 export default function robots() {
   return {
@@ -20,7 +19,6 @@ export default function robots() {
         ],
       },
     ],
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    sitemap: canonicalUrl("/sitemap.xml"),
   };
 }
-

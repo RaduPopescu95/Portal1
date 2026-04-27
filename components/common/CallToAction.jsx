@@ -11,11 +11,11 @@ const CallToAction = ({ className }) => {
           <div className="col-lg-6 col-sm-12 text-center text-lg-start">
             <div className="start_partner tac-smd ">
               <h2>Vrei sa îți promovezi serviciile?</h2>
-              <h3>
+              <p className="fz18">
                 Contactează-ne și îți putem oferi o soluție personalizată pentru
                 afacerea ta!
-              </h3>
-              <h2>Contactează-ne!</h2>
+              </p>
+              <p className="fz20 fw-bold">Contactează-ne!</p>
             </div>
 
             <div class="d-flex w-100 flex-column align-items-center align-items-lg-start">

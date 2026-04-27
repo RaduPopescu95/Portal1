@@ -50,9 +50,9 @@ const Comments = () => {
                 <ul className="mb0 pl15">{item.ratings}</ul>
               </span>
             </h4>
-            <a className="sspd_postdate fz14" href="#">
+            <span className="sspd_postdate fz14">
               {item.data}
-            </a>
+            </span>
             <p className="fz14 mt10">{item.text}</p>
           </div>
         </div>

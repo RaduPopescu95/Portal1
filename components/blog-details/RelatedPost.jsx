@@ -36,7 +36,7 @@ const RelatedPost = ({ articole = [] }) => {
                     <i className="flaticon-calendar"></i>
                   </li>
                   <li className="list-inline-item">
-                    <a href="#">{item?.firstUploadDate}</a>
+                    <span>{item?.firstUploadDate}</span>
                   </li>
                 </ul>
                 <p>{item?.metaDescription?.slice(0, 65)}</p>

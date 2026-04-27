@@ -1,15 +1,14 @@
 import SliderStyle from "@/components/listing-style/slider-style";
 import JsonLd, { BreadcrumbsJsonLd } from "@/components/common/JsonLd";
 import { buildItemListLd } from "@/utils/schemaOrg";
+import { canonicalUrl } from "@/utils/siteUrl";
+import { DEFAULT_OG_IMAGE } from "@/utils/seoDefaults";
 import {
   getCounties,
   getCities,
   getPublishedCompanies,
   getServiceCategories,
 } from "@/lib/sanity/queries";
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
 
 export const metadata = {
   title: "Cauta firme de amenajari spatii verzi",
@@ -19,10 +18,11 @@ export const metadata = {
     title: "Cauta firme de amenajari spatii verzi",
     description:
       "Cauta un furnizor de servicii de amenajari spatii verzi in apropiere si solicita o oferta personalizata.",
-    url: "/cauta",
+    url: canonicalUrl("/cauta"),
+    images: [DEFAULT_OG_IMAGE],
   },
   alternates: {
-    canonical: "/cauta",
+    canonical: canonicalUrl("/cauta"),
   },
 };
 
@@ -52,10 +52,10 @@ const index = async ({ params }) => {
     name: "Cauta firme de amenajari spatii verzi",
     description:
       "Cauta un furnizor de servicii de amenajari spatii verzi in apropiere si solicita o oferta personalizata.",
-    url: `${SITE_URL}/cauta`,
+    url: canonicalUrl("/cauta"),
   };
 
-  const itemListLd = buildItemListLd(data.firme, SITE_URL);
+  const itemListLd = buildItemListLd(data.firme);
 
   return (
     <>
@@ -74,6 +74,7 @@ const index = async ({ params }) => {
         categorii={data.categorii}
         localitati={data.localitati}
         firme={data.firme}
+        renderMode="listing"
         h1Title="Cauta firme de amenajari gradini si spatii verzi"
       />
     </>

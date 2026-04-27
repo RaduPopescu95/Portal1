@@ -1,11 +1,4 @@
-import BreadCrumb2 from "@/components/blog-details/BreadCrumb2";
-import Comments from "@/components/blog-details/Comments";
-import Pagination from "@/components/blog-details/Pagination";
-import Ratings from "@/components/blog-details/Ratings";
 import RelatedPost from "@/components/blog-details/RelatedPost";
-import ReviewBox from "@/components/blog-details/ReviewBox";
-import BlogSidebar from "@/components/common/blog/BlogSidebar";
-import CopyrightFooter from "@/components/common/footer/CopyrightFooter";
 import Footer from "@/components/common/footer/Footer";
 import Social from "@/components/common/footer/Social";
 import Header from "@/components/common/header/DefaultHeader";
@@ -21,9 +14,8 @@ import {
 } from "@/lib/sanity/queries";
 import PortableContent from "@/components/sanity/PortableContent";
 import { notFound } from "next/navigation";
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://firmeamenajarigradina.ro";
+import { canonicalUrl } from "@/utils/siteUrl";
+import { DEFAULT_OG_IMAGE } from "@/utils/seoDefaults";
 
 export const revalidate = 60; // revalidate at most every minute , hour at 3600
 
@@ -41,6 +33,7 @@ export async function generateMetadata({ params }) {
     blog?.metaDescription ||
     "Articole si ghiduri despre amenajari gradini si spatii verzi.";
   const imageUrl = blog?.image?.finalUri;
+  const canonical = canonicalUrl(`/blog/${params.id}`);
 
   return {
     title,
@@ -49,11 +42,11 @@ export async function generateMetadata({ params }) {
       title,
       description,
       type: "article",
-      url: `/blog/${params.id}`,
-      images: imageUrl ? [{ url: imageUrl }] : undefined,
+      url: canonical,
+      images: imageUrl ? [{ url: imageUrl }] : [DEFAULT_OG_IMAGE],
     },
     alternates: {
-      canonical: `/blog/${params.id}`,
+      canonical,
     },
   };
 }
@@ -66,7 +59,7 @@ const BlogDetailsDynamic = async ({ params }) => {
   if (!blog) {
     notFound();
   }
-  const articleLd = buildArticleLd(blog, SITE_URL, `/blog/${params.id}`);
+  const articleLd = buildArticleLd(blog, null, `/blog/${params.id}`);
 
   return (
     <>
@@ -105,43 +98,14 @@ const BlogDetailsDynamic = async ({ params }) => {
             <div className="col-lg-12">
               <div className="main_blog_post_content">
                 <div className="mbp_thumb_post">
-                  {/* <div className="blog_sp_tag">
-                    <a href="#">{blog?.postMeta}</a>
-                  </div> */}
-                  <h3 className="blog_sp_title">{blog?.siteName}</h3>
+                  <h1 className="blog_sp_title">{blog?.siteName}</h1>
                   <ul className="blog_sp_post_meta">
-                    {/* <li className="list-inline-item">
-                      <a href="#">
-                        <Image
-                          width={40}
-                          height={40}
-                          className="img-fluid"
-                          src="/assets/images/property/pposter1.png"
-                          alt="pposter1.png"
-                        />
-                      </a>
-                    </li> */}
-                    {/* <li className="list-inline-item">
-                      <a href="#">Ali Tufan</a>
-                    </li> */}
                     <li className="list-inline-item">
                       <span className="flaticon-calendar"></span>
                     </li>
                     <li className="list-inline-item">
-                      <a href="#">{blog?.firstUploadDate}</a>
+                      <span>{blog?.firstUploadDate}</span>
                     </li>
-                    {/* <li className="list-inline-item">
-                      <span className="flaticon-view"></span>
-                    </li>
-                    <li className="list-inline-item">
-                      <a href="#"> 341 views</a>
-                    </li>
-                    <li className="list-inline-item">
-                      <span className="flaticon-chat"></span>
-                    </li>
-                    <li className="list-inline-item">
-                      <a href="#">15</a>
-                    </li> */}
                   </ul>
                   <div className="thumb">
                     <Image
@@ -167,67 +131,18 @@ const BlogDetailsDynamic = async ({ params }) => {
                 </div>
                 {/* End .mbp_thumb_post */}
 
-                {/* <div className="mbp_pagination_tab">
-                  <Pagination />
-                </div> */}
-                {/* End mbp_pagination_tab */}
-                {/* 
-                <div className="product_single_content mb30">
-                  <div className="mbp_pagination_comments">
-                    <div className="total_review">
-                      <h4>896 Reviews</h4>
-                      <ul className="review_star_list mb0 pl10">
-                        <Ratings />
-                      </ul>
-                      <a className="tr_outoff pl10" href="#">
-                        ( 4.5 out of 5 )
-                      </a>
-                      <a className="write_review float-end fn-xsd" href="#">
-                        Write a Review
-                      </a>
-                    </div>
-
-
-                    <Comments />
-                    <div className="custom_hr"></div>
-                  </div>
-                </div> */}
-                {/* End .product_single_content  */}
-
-                {/* <div className="bsp_reveiw_wrt">
-                  <h4>Write a Review</h4>
-
-                  <ul className="review_star">
-                    <li className="list-inline-item">
-                      <span className="sspd_review">
-                        <ul>
-                          <Ratings />
-                        </ul>
-                      </span>
-                    </li>
-                    <li className="list-inline-item pr15">
-                      <p>Your Rating & Review</p>
-                    </li>
-                  </ul>
-                  <ReviewBox />
-                </div> */}
-                {/* End .bsp_reveiw_wrt */}
               </div>
               {/* End .main_blog_post_content */}
 
               <div className="row">
                 <div className="col-lg-12 mb20 mt20">
-                  <h4>Alte articole</h4>
+                  <h2>Alte articole</h2>
                 </div>
                 <RelatedPost articole={articole} />
               </div>
             </div>
             {/* End .col */}
 
-            {/* <div className="col-lg-4">
-              <BlogSidebar />
-            </div> */}
-            {/* End Sidebar column */}
           </div>
           {/* End .row */}
         </div>
@@ -243,12 +158,6 @@ const BlogDetailsDynamic = async ({ params }) => {
         </div>
       </section>
 
-      {/* <!-- Our Footer Bottom Area --> */}
-      {/* <section className="footer_middle_area pt40 pb40">
-        <div className="container">
-          <CopyrightFooter />
-        </div>
-      </section> */}
     </>
   );
 };
